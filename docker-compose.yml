@@ -1,0 +1,29 @@
+services:
+  # API Backend
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: ai-back-offices-api
+    restart: unless-stopped
+    ports:
+      - "5167:5167"
+    networks:
+      - ai-back-offices-network
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: ai-back-offices-web
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    networks:
+      - ai-back-offices-network
+
+networks:
+  ai-back-offices-network:
+    driver: bridge
