@@ -354,7 +354,7 @@ async countImagesBySubId(subId: string) {
         throw new UnprocessableEntityException('subId is required');
       }
 
-      const issuePrefix = `rival-ocr-services/${filter.subId}/issue_images/process/`;
+      const issuePrefix = `ocr-services/${filter.subId}/issue_images/process/`;
       const issueKeys = await this.listObjectsInPrefix(issuePrefix);
 
       // Pagination logic
@@ -417,11 +417,11 @@ async countImagesBySubId(subId: string) {
         return true;
       });
     }
-
+    console.log('subId:', subId)
     return filtered
       .filter(item => !!item.imgName)
       .map(item => ({
-        processUrl: `rival-ocr-services/${subId}/process/cropped_${item.imgName}.jpg`,
+        processUrl: `ocr-services/${subId}/process/cropped_${item.imgName}.jpg`,
       }));
 
   } catch (error) {
