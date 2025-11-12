@@ -417,7 +417,7 @@ async countImagesBySubId(subId: string) {
         return true;
       });
     }
-    console.log('subId:', subId)
+    
     return filtered
       .filter(item => !!item.imgName)
       .map(item => ({
