@@ -4,10 +4,19 @@ import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 
 import { cn } from "../../lib/utils"
 
-function DropdownMenu({
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
-  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />
+interface DropdownMenuProps extends React.ComponentProps<typeof DropdownMenuPrimitive.Root> {
+  noScrollLock?: boolean
+}
+
+function DropdownMenu({ noScrollLock, ...props }: DropdownMenuProps) {
+  // Radix DropdownMenu can run in modal mode (inert background). Force non-modal when noScrollLock.
+  return (
+    <DropdownMenuPrimitive.Root
+      data-slot="dropdown-menu"
+      modal={!noScrollLock}
+      {...props}
+    />
+  )
 }
 
 function DropdownMenuPortal({

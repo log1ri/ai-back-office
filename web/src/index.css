@@ -142,3 +142,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+body[style*="overflow: hidden"] {
+  overflow-y: scroll !important;
+}
+

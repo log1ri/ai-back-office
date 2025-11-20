@@ -6,10 +6,13 @@ function cn(...classes: (string | undefined | false)[]) {
   return classes.filter(Boolean).join(" ")
 }
 
-function Dialog({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+interface DialogProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
+  noScrollLock?: boolean
+}
+
+function Dialog({ noScrollLock, ...props }: DialogProps) {
+  // Radix Dialog locks scroll when modal=true (default). Set modal=false to keep body scroll.
+  return <DialogPrimitive.Root data-slot="dialog" modal={!noScrollLock} {...props} />
 }
 
 function DialogTrigger({

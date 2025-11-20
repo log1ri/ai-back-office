@@ -441,6 +441,19 @@ type StatusFilter = "verified" | "modified";
 export function ImageLogPage() {
   // --- Download Modal State ---
   const [isDownloadModalOpen, setDownloadModalOpen] = useState(false);
+  
+  // Force body scrollbar to remain visible while this page is mounted.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const body = document.body;
+      if (!body) return;
+      if (body.style.overflow === "hidden") {
+        body.style.overflowY = "scroll";
+        body.style.overflow = "auto"; // restore normal scrolling
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
   // ใช้ DatePicker 2 ตัวสำหรับเลือก start/end
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -1164,7 +1177,7 @@ export function ImageLogPage() {
             Download ZIP
           </Button>
       {/* Download Modal (ใช้ ShadcnDatePicker 2 ตัว) */}
-      <Dialog open={isDownloadModalOpen} onOpenChange={setDownloadModalOpen}>
+  <Dialog noScrollLock open={isDownloadModalOpen} onOpenChange={setDownloadModalOpen}>
         <DialogContent className="!w-[570px] !max-w-[90vw]">
           <DialogHeader>
             <DialogTitle>Download ZIP</DialogTitle>
@@ -1191,7 +1204,7 @@ export function ImageLogPage() {
             </div>
             <div className="flex-[1] min-w-[120px]">
               <p className="text-sm font-medium mb-2">Status</p>
-              <DropdownMenu>
+              <DropdownMenu noScrollLock>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
@@ -1245,7 +1258,7 @@ export function ImageLogPage() {
           </div>
 
           {/* Filter Dropdown */}
-          <DropdownMenu>
+          <DropdownMenu noScrollLock>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
@@ -1273,7 +1286,7 @@ export function ImageLogPage() {
           </DropdownMenu>
 
           {/* Status Filter */}
-          <DropdownMenu>
+          <DropdownMenu noScrollLock>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
@@ -1549,7 +1562,7 @@ export function ImageLogPage() {
       )}
 
       {/* Summary Dialog - เพิ่มส่วนนี้เข้ามา */}
-      <Dialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
+  <Dialog noScrollLock open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Image Rating Summary</DialogTitle>
