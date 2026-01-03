@@ -62,7 +62,7 @@ export function TeamSwitcher({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu noScrollLock>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
