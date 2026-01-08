@@ -1142,10 +1142,6 @@ export function ImageLogPage() {
           <p className="text-muted-foreground truncate">
             Manage and organize all your images
           </p>
-          {/* บรรทัดนี้ถูกย้ายและปรับแต่งให้มีขนาดเล็กลง */}
-          <p className="text-muted-foreground truncate text-sm">
-            Organization: <span className="font-semibold text-foreground">{subId}</span>
-          </p>
         </div>
 
         {/* กลุ่ม Check Rate, Download, Search, Filter */}
