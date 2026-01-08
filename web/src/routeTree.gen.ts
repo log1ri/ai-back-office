@@ -16,10 +16,6 @@ import { Route as EventTrackingTestRouteImport } from './routes/event-tracking-t
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OcrServicesIndexRouteImport } from './routes/ocr-services/index'
-import { Route as OcrServicesApiDocsUsageExamplesRouteImport } from './routes/ocr-services/api-docs/usage-examples'
-import { Route as OcrServicesApiDocsChangelogRouteImport } from './routes/ocr-services/api-docs/changelog'
-import { Route as OcrServicesApiDocsBestPracticesRouteImport } from './routes/ocr-services/api-docs/best-practices'
-import { Route as OcrServicesOrgldPriceRouteImport } from './routes/ocr-services/$orgld.price'
 import { Route as OcrServicesOrgIdOverviewRouteImport } from './routes/ocr-services/$orgId.overview'
 import { Route as OcrServicesOrgIdIssuesRouteImport } from './routes/ocr-services/$orgId.issues'
 import { Route as OcrServicesOrgIdHomeRouteImport } from './routes/ocr-services/$orgId.home'
@@ -59,29 +55,6 @@ const OcrServicesIndexRoute = OcrServicesIndexRouteImport.update({
   path: '/ocr-services/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OcrServicesApiDocsUsageExamplesRoute =
-  OcrServicesApiDocsUsageExamplesRouteImport.update({
-    id: '/ocr-services/api-docs/usage-examples',
-    path: '/ocr-services/api-docs/usage-examples',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OcrServicesApiDocsChangelogRoute =
-  OcrServicesApiDocsChangelogRouteImport.update({
-    id: '/ocr-services/api-docs/changelog',
-    path: '/ocr-services/api-docs/changelog',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OcrServicesApiDocsBestPracticesRoute =
-  OcrServicesApiDocsBestPracticesRouteImport.update({
-    id: '/ocr-services/api-docs/best-practices',
-    path: '/ocr-services/api-docs/best-practices',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OcrServicesOrgldPriceRoute = OcrServicesOrgldPriceRouteImport.update({
-  id: '/ocr-services/$orgld/price',
-  path: '/ocr-services/$orgld/price',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OcrServicesOrgIdOverviewRoute =
   OcrServicesOrgIdOverviewRouteImport.update({
     id: '/ocr-services/$orgId/overview',
@@ -110,10 +83,6 @@ export interface FileRoutesByFullPath {
   '/ocr-services/$orgId/home': typeof OcrServicesOrgIdHomeRoute
   '/ocr-services/$orgId/issues': typeof OcrServicesOrgIdIssuesRoute
   '/ocr-services/$orgId/overview': typeof OcrServicesOrgIdOverviewRoute
-  '/ocr-services/$orgld/price': typeof OcrServicesOrgldPriceRoute
-  '/ocr-services/api-docs/best-practices': typeof OcrServicesApiDocsBestPracticesRoute
-  '/ocr-services/api-docs/changelog': typeof OcrServicesApiDocsChangelogRoute
-  '/ocr-services/api-docs/usage-examples': typeof OcrServicesApiDocsUsageExamplesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,10 +95,6 @@ export interface FileRoutesByTo {
   '/ocr-services/$orgId/home': typeof OcrServicesOrgIdHomeRoute
   '/ocr-services/$orgId/issues': typeof OcrServicesOrgIdIssuesRoute
   '/ocr-services/$orgId/overview': typeof OcrServicesOrgIdOverviewRoute
-  '/ocr-services/$orgld/price': typeof OcrServicesOrgldPriceRoute
-  '/ocr-services/api-docs/best-practices': typeof OcrServicesApiDocsBestPracticesRoute
-  '/ocr-services/api-docs/changelog': typeof OcrServicesApiDocsChangelogRoute
-  '/ocr-services/api-docs/usage-examples': typeof OcrServicesApiDocsUsageExamplesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,10 +108,6 @@ export interface FileRoutesById {
   '/ocr-services/$orgId/home': typeof OcrServicesOrgIdHomeRoute
   '/ocr-services/$orgId/issues': typeof OcrServicesOrgIdIssuesRoute
   '/ocr-services/$orgId/overview': typeof OcrServicesOrgIdOverviewRoute
-  '/ocr-services/$orgld/price': typeof OcrServicesOrgldPriceRoute
-  '/ocr-services/api-docs/best-practices': typeof OcrServicesApiDocsBestPracticesRoute
-  '/ocr-services/api-docs/changelog': typeof OcrServicesApiDocsChangelogRoute
-  '/ocr-services/api-docs/usage-examples': typeof OcrServicesApiDocsUsageExamplesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,10 +122,6 @@ export interface FileRouteTypes {
     | '/ocr-services/$orgId/home'
     | '/ocr-services/$orgId/issues'
     | '/ocr-services/$orgId/overview'
-    | '/ocr-services/$orgld/price'
-    | '/ocr-services/api-docs/best-practices'
-    | '/ocr-services/api-docs/changelog'
-    | '/ocr-services/api-docs/usage-examples'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -177,10 +134,6 @@ export interface FileRouteTypes {
     | '/ocr-services/$orgId/home'
     | '/ocr-services/$orgId/issues'
     | '/ocr-services/$orgId/overview'
-    | '/ocr-services/$orgld/price'
-    | '/ocr-services/api-docs/best-practices'
-    | '/ocr-services/api-docs/changelog'
-    | '/ocr-services/api-docs/usage-examples'
   id:
     | '__root__'
     | '/'
@@ -193,10 +146,6 @@ export interface FileRouteTypes {
     | '/ocr-services/$orgId/home'
     | '/ocr-services/$orgId/issues'
     | '/ocr-services/$orgId/overview'
-    | '/ocr-services/$orgld/price'
-    | '/ocr-services/api-docs/best-practices'
-    | '/ocr-services/api-docs/changelog'
-    | '/ocr-services/api-docs/usage-examples'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -210,10 +159,6 @@ export interface RootRouteChildren {
   OcrServicesOrgIdHomeRoute: typeof OcrServicesOrgIdHomeRoute
   OcrServicesOrgIdIssuesRoute: typeof OcrServicesOrgIdIssuesRoute
   OcrServicesOrgIdOverviewRoute: typeof OcrServicesOrgIdOverviewRoute
-  OcrServicesOrgldPriceRoute: typeof OcrServicesOrgldPriceRoute
-  OcrServicesApiDocsBestPracticesRoute: typeof OcrServicesApiDocsBestPracticesRoute
-  OcrServicesApiDocsChangelogRoute: typeof OcrServicesApiDocsChangelogRoute
-  OcrServicesApiDocsUsageExamplesRoute: typeof OcrServicesApiDocsUsageExamplesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -267,34 +212,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OcrServicesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ocr-services/api-docs/usage-examples': {
-      id: '/ocr-services/api-docs/usage-examples'
-      path: '/ocr-services/api-docs/usage-examples'
-      fullPath: '/ocr-services/api-docs/usage-examples'
-      preLoaderRoute: typeof OcrServicesApiDocsUsageExamplesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ocr-services/api-docs/changelog': {
-      id: '/ocr-services/api-docs/changelog'
-      path: '/ocr-services/api-docs/changelog'
-      fullPath: '/ocr-services/api-docs/changelog'
-      preLoaderRoute: typeof OcrServicesApiDocsChangelogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ocr-services/api-docs/best-practices': {
-      id: '/ocr-services/api-docs/best-practices'
-      path: '/ocr-services/api-docs/best-practices'
-      fullPath: '/ocr-services/api-docs/best-practices'
-      preLoaderRoute: typeof OcrServicesApiDocsBestPracticesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ocr-services/$orgld/price': {
-      id: '/ocr-services/$orgld/price'
-      path: '/ocr-services/$orgld/price'
-      fullPath: '/ocr-services/$orgld/price'
-      preLoaderRoute: typeof OcrServicesOrgldPriceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/ocr-services/$orgId/overview': {
       id: '/ocr-services/$orgId/overview'
       path: '/ocr-services/$orgId/overview'
@@ -330,10 +247,6 @@ const rootRouteChildren: RootRouteChildren = {
   OcrServicesOrgIdHomeRoute: OcrServicesOrgIdHomeRoute,
   OcrServicesOrgIdIssuesRoute: OcrServicesOrgIdIssuesRoute,
   OcrServicesOrgIdOverviewRoute: OcrServicesOrgIdOverviewRoute,
-  OcrServicesOrgldPriceRoute: OcrServicesOrgldPriceRoute,
-  OcrServicesApiDocsBestPracticesRoute: OcrServicesApiDocsBestPracticesRoute,
-  OcrServicesApiDocsChangelogRoute: OcrServicesApiDocsChangelogRoute,
-  OcrServicesApiDocsUsageExamplesRoute: OcrServicesApiDocsUsageExamplesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -30,33 +30,6 @@ export const PROJECT_NAVIGATION_ITEMS = [
     url: '/issues', // Changed from '/about' to '/issues' for clarity
     icon: AlertTriangle,
   },
-  {
-    name: 'Price Management',
-    url: '/price',
-    icon: DollarSign,
-  },
-  {
-    name: 'ApiDocs',
-    url: '/api-docs',
-    icon: CloudCog ,
-    children: [
-      {
-        name: 'Usage Examples',
-        url: '/usage-examples',
-        icon: BookOpen,
-      },
-      {
-        name: 'Best Practices',
-        url: '/best-practices',
-        icon: Lightbulb,
-      },
-      {
-        name: 'Changelog',
-        url: '/changelog',
-        icon: History,
-      }
-    ]
-  },
 ] as const;
 
 export const SIDEBAR_LABELS = {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSubIdContext } from "../../contexts/SubIdContext";
 import { useImageIssues } from "../../hooks/useImageIssues";
 import { Card, CardContent } from "../../components/ui/card";
@@ -14,18 +14,6 @@ export default function ImageIssuePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedImagePopup, setSelectedImagePopup] = useState<string | null>(null);
   const { subId } = useSubIdContext();
-
-  useEffect(() => {
-    if (selectedImagePopup) {
-      document.body.classList.add("overflow-hidden");
-    } else {
-      document.body.classList.remove("overflow-hidden");
-    }
-
-    return () => {
-      document.body.classList.remove("overflow-hidden");
-    }
-  }, [selectedImagePopup]);
 
   const { data, isLoading, error } = useImageIssues({ 
     page: currentPage,
@@ -57,6 +45,7 @@ export default function ImageIssuePage() {
             Image Issues
           </h1>
           <p className=" truncate">Images that have problems and need correction</p>
+          <p className=" truncate text-sm">Organization: <span className="font-semibold">{subId}</span></p>
         </div>
 
         <div className="flex items-center gap-3">
