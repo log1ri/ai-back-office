@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Request, UseGuards, Query } from '@nestjs/common';
 import { OcrServicesLogsService } from './ocr-services-logs.service';
 import { FilterOcrServicesLogDto } from './dto/filter-ocr-services-log.dto'
+import { FilterOcrServicesSessionDto } from './dto/filter-ocr-services-session.dto'
 import { OcrServiceLog } from './schemas/ocr-services-logs.schema'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -18,12 +19,19 @@ export class OcrServicesLogsController {
     return this.ocrServicesLogsService.findAll();
   }
 
-
+  // ocr-log pagination and filter
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Supervisor, Role.Manager, Role.Guest)
   @Get("/filter")
   findByFilter(@Request() req, @Query() filter: FilterOcrServicesLogDto) {
     return this.ocrServicesLogsService.findByFilter(filter);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Supervisor, Role.Manager, Role.Guest)
+  @Get("/session")
+  findSession(@Query() filter: FilterOcrServicesSessionDto) {
+    return this.ocrServicesLogsService.findBySessionFilter(filter);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

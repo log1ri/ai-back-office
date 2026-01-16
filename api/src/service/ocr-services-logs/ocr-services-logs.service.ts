@@ -2,17 +2,20 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, InternalServerErrorException, UnprocessableEntityException} from '@nestjs/common';
 import { OcrServiceLog } from './schemas/ocr-services-logs.schema';
+import { OcrServiceSession } from './schemas/ocr-services-sessions.schema';
 import { OcrServicesImgsService } from '../ocr-services-imgs/ocr-services-imgs.service';
 import { LogRealtimeDto } from './dto/realtime-ocr-services-log.dto';
 import { FilterOcrServicesLogDto } from './dto/filter-ocr-services-log.dto';
 import { FilterRealtimeLogsDto} from './dto/filter-realtime-ocr-services-log.dto';
+import { FilterOcrServicesSessionDto } from './dto/filter-ocr-services-session.dto';
 import { OcrServicesLogsResponseDto } from './dto/ocr-services-logs.dto'
+import { OcrServicesSessionResponseDto } from './dto/ocr-services-sessions.dto';
 import { validateDateRange, shiftMonthSafeUTC, createDateRangeQuery, addDays, normalizeStartOfDayUTC, endOfDayUTC } from '../../utils/date.util';
-
 @Injectable()
 export class OcrServicesLogsService {
   constructor(
     @InjectModel(OcrServiceLog.name) private ocrServiceLogModel: Model<OcrServiceLog>,
+    @InjectModel(OcrServiceSession.name) private ocrServiceSessionModel: Model<OcrServiceSession>,
     private ocrServicesImgsService: OcrServicesImgsService,
   ) {}
 
@@ -174,5 +177,94 @@ export class OcrServicesLogsService {
       throw error;
     }
   }
+
+  async findBySessionFilter(filter: FilterOcrServicesSessionDto): Promise<OcrServicesSessionResponseDto> {
+    try
+    {
+      
+      // Filter by subId if provided
+      if (!filter.subId) {
+        throw new UnprocessableEntityException('subId is required');
+      } 
+
+      const query: any = {};
+      query['subId'] = filter.subId;
+
+      if (filter.status) {
+        query['status'] = filter.status;
+      }
+
+      const escapeRegex = (input: string) =>
+        input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // ✅ search: ค้นหาได้หลาย field (ตัวอย่าง reg_num/province/status)
+      if (filter.search && filter.search.trim() !== '') {
+        const search = escapeRegex(filter.search.trim());
+        query.$or = [
+          { reg_num: { $regex: search, $options: 'i' } },
+          { province: { $regex: search, $options: 'i' } },
+          { status: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+      const sortField = filter.sortBy ?? 'lastSeenAt';
+      const sortOrder = filter.order === 'asc' ? 1 : -1;
+
+      // Pagination (default)
+      const page = filter.page;
+      const limit = filter.limit;
+      if (!page || !limit) {
+        throw new UnprocessableEntityException('page and limit are required');
+      }
+      const skip = (page - 1) * limit;
+      
+      // Fetch data and total count
+      const [data, total] = await Promise.all([
+        this.ocrServiceSessionModel
+          .find(query)
+          .sort({ [sortField]: sortOrder })
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        this.ocrServiceSessionModel.countDocuments(query)
+      ]);
+
+
+
+      // Map through data to format image URLs
+      const formattedData = await Promise.all(data.map(async (item) => {
+
+        return {
+          ...item,
+        };
+      }))
+
+      // Calculate pagination details
+      const total_pages = Math.ceil(total / limit);
+      const nextPage = page < total_pages ? page + 1 : null;
+      const prevPage = page > 1 ? page - 1 : null;
+
+      // Prepare pagination object
+      const pagination = {
+        total_records: total,
+        current_page: page,
+        total_pages: total_pages,
+        next_page: nextPage,
+        prev_page: prevPage,
+      };
+
+      // Return formatted data with pagination
+      return {
+        data: formattedData,
+        ...pagination,
+      };
+    } catch (error) {
+      throw error;
+    }
+  
+  
+  
+  } 
+
 
 }
