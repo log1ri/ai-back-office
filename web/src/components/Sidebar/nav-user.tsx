@@ -86,7 +86,6 @@ export function NavUser({ user }: NavUserProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out

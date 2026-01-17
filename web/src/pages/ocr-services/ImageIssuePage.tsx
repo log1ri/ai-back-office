@@ -60,7 +60,7 @@ export default function ImageIssuePage() {
           </div>
 
           {/* Filter Dropdown */}
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="bg-white whitespace-nowrap">
                 <SlidersHorizontal className="w-4 h-4 mr-2" />
