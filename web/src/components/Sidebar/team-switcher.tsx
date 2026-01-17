@@ -14,6 +14,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuAction,
   useSidebar,
 } from "../ui/sidebar";
 import type { TeamSwitcherProps } from "../../types/sidebar.types";
@@ -78,6 +79,11 @@ export function TeamSwitcher({
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+          <SidebarMenuAction className="hidden group-data-[collapsible=icon]:flex" asChild>
+            <div className="flex aspect-square h-8 w-8 items-center justify-center rounded-lg overflow-hidden bg-white p-1">
+              <TeamLogo team={activeTeam} size={28} />
+            </div>
+          </SidebarMenuAction>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             align="start"
