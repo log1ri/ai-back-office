@@ -96,9 +96,9 @@ const LoginPage: React.FC = () => {
       <div className="flex w-full max-w-[900px] min-w-[320px] h-fit max-h-[95vh] bg-white rounded-2xl shadow-[0_20px_80px_rgba(173,179,199,0.45)] overflow-hidden relative z-10 mx-auto">
         {/* Welcome Panel */}
         <div className="flex-1 min-w-0 flex flex-col justify-center items-center text-center relative bg-gradient-to-br from-indigo-500 to-purple-500 text-white p-10">
-          <h1 className="text-3xl font-bold mb-8">{isRegisterMode ? "Join Our AI Team" : "Welcome to Rival"}</h1>
+          <h1 className="text-3xl font-bold mb-8">{isRegisterMode ? "Join Our AI Team" : "Welcome to AI LPR"}</h1>
           <img
-            src="/unit.png"
+            src="/AI-LPR.png"
             alt="Robot Icon"
             className="w-[320px] h-[320px] mb-4 object-contain"
           />

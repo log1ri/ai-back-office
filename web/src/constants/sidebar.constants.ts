@@ -41,24 +41,10 @@ export const SIDEBAR_LABELS = {
 } as const;
 
 export const USER_MENU_ITEMS = [
-  { key: 'upgrade', label: 'Upgrade to Pro', icon: 'Sparkles' },
-  { key: 'account', label: 'Account', icon: 'BadgeCheck' },
-  { key: 'billing', label: 'Billing', icon: 'CreditCard' },
-  { key: 'notifications', label: 'Notifications', icon: 'Bell' },
   { key: 'logout', label: 'Log out', icon: 'LogOut' },
 ] as const;
 
-export const PROJECT_MENU_ITEMS = [
-  { key: 'view', label: 'View Project', icon: 'Folder' },
-  { key: 'share', label: 'Share Project', icon: 'Forward' },
-  { key: 'delete', label: 'Delete Project', icon: 'Trash2' },
-] as const;
-
-export const ANIMATION_CONFIG = {
-  TRANSITION_DURATION: 200,
-  EASE: 'ease-linear',
-  HOVER_DELAY: 100,
-} as const;
+export const PROJECT_MENU_ITEMS = [] as const;
 
 export const BREAKPOINTS = {
   MOBILE: 768,

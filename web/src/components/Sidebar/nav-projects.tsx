@@ -105,47 +105,7 @@ const ProjectMenuItem: React.FC<{ item: any }> = React.memo(({ item }) => {
       </SidebarMenu>
     )}
 
-    {item.name !== "ApiDocs" && (
-    <DropdownMenu>
-      {/* <DropdownMenuTrigger asChild>
-        <SidebarMenuAction showOnHover>
-          {item.name === "ApiDocs"
-            ? (open
-                ? <ChevronDown className="w-4 h-4" />
-                : <ChevronRight className="w-4 h-4" />)
-            : <MoreHorizontal />}
-          <span className="sr-only">More</span>
-        </SidebarMenuAction>
-      </DropdownMenuTrigger> */}
-
-      <DropdownMenuTrigger asChild>
-      <SidebarMenuAction showOnHover>
-        <MoreHorizontal />
-        <span className="sr-only">More</span>
-      </SidebarMenuAction>
-    </DropdownMenuTrigger>
-
-      <DropdownMenuContent
-        className="w-48 rounded-lg"
-        side={isMobile ? "bottom" : "right"}
-        align={isMobile ? "end" : "start"}
-      >
-        {PROJECT_MENU_ITEMS.slice(0, 2).map((menuItem) => (
-          <DropdownMenuItem key={menuItem.key}>
-            {menuItem.key === 'view' && <Folder className="text-muted-foreground" />}
-            {menuItem.key === 'share' && <Forward className="text-muted-foreground" />}
-            <span>{menuItem.label}</span>
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem>
-          <Trash2 className="text-muted-foreground" />
-          <span>{PROJECT_MENU_ITEMS[2].label}</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-    )}
+    {/* Project menu removed */}
   </>
 </SidebarMenuItem>
   );
