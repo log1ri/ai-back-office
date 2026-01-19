@@ -1,21 +1,20 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import LogsAnalyticsDashboard from "../../components/charts/LogsAnalyticsDashboard";
 import {
-  ChevronRight,
-  Filter,
-  List,
+  Car,
   Wifi,
   WifiOff,
-  RotateCcw,
-  RefreshCw,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Clock,
+  Timer,
+  TrendingUp,
 } from "lucide-react";
 import {
   Table,
@@ -27,415 +26,412 @@ import {
 } from "../../components/ui/table";
 import { useRealtimeLogs } from "../../hooks/useRealtimeLogs";
 import { useSubIdContext } from "../../contexts/SubIdContext";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+interface VehicleActivity {
+  regNum: string;
+  province: string;
+  timestamp: string;
+  status: 'IN' | 'OUT' | 'INSIDE';
+  parkingDuration?: string;
+  timeIn?: string;
+}
 
 export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const { subId: contextSubId } = useSubIdContext();
-  
-  // Use context subId, but allow override for testing
-  const [localSubId, setLocalSubId] = useState("test");
-  const activeSubId = localSubId || contextSubId;
 
   const {
     logs: realtimeLogs,
     isConnected,
     loading,
     error,
-    clearLogs,
-    sendMessage,
   } = useRealtimeLogs({
     baseUrl: "http://localhost:5167",
-    maxLogs: 50,
+    maxLogs: 100,
   });
 
-  const displayLogs = realtimeLogs;
+  // Process logs to extract vehicle activities
+  const vehicleActivities = useMemo<VehicleActivity[]>(() => {
+    const activities: VehicleActivity[] = [];
+    const vehicleMap = new Map<string, { firstSeen: string; lastSeen: string; isInside: boolean }>();
 
-  const filteredLogs = displayLogs.filter((log) => {
-    try {
-      const parsedData = typeof log.source === 'string' ? JSON.parse(log.source) : log.source;
-      return (
-        (parsedData.province ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        String(parsedData.status ?? "").includes(searchTerm.toLowerCase()) ||
-        (parsedData.action ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (parsedData.regNum ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (log.eventName ?? "").toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    } catch (e) {
-      return log.source.toLowerCase().includes(searchTerm.toLowerCase());
-    }
-  });
+    realtimeLogs.forEach((log) => {
+      try {
+        const parsedData = typeof log.source === 'string' ? JSON.parse(log.source) : log.source;
+        const regNum = parsedData.regNum || 'UNKNOWN';
+        const province = parsedData.province || 'N/A';
+        const timestamp = parsedData.timestamp || log.timestamp;
+        const action = parsedData.action || '';
 
-  // Function to manually request logs with specific subId
-  const handleGetRealtimeLogs = () => {
-    if (sendMessage && activeSubId) {
-      const requestData = {
-        subId: activeSubId,
-      };
-      sendMessage("get-realtime-logs", requestData);
-    }
-  };
+        // Track vehicle state
+        if (!vehicleMap.has(regNum)) {
+          vehicleMap.set(regNum, { 
+            firstSeen: timestamp,
+            lastSeen: timestamp,
+            isInside: action.includes('in') || action.includes('entry')
+          });
+        } else {
+          const vehicle = vehicleMap.get(regNum)!;
+          vehicle.lastSeen = timestamp;
+          vehicle.isInside = action.includes('in') || action.includes('entry');
+        }
 
-  // Function to get available SubIds
-  const handleGetAvailableSubIds = () => {
-    if (sendMessage) {
-      sendMessage("get-available-subids", {});
-    }
-  };
+        // Determine status
+        let status: 'IN' | 'OUT' | 'INSIDE' = 'INSIDE';
+        if (action.includes('out') || action.includes('exit')) {
+          status = 'OUT';
+        } else if (action.includes('in') || action.includes('entry')) {
+          status = 'IN';
+        }
 
-  // Function to create test data for demonstration
-  const handleCreateTestData = () => {
-    const testLogs = [
-      {
-        id: '6889e2ede1ab1caefc9be2fd',
-        action: 'extract_data_yolo',
-        timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
-        subId: '686756400ae6dcd28bee12af',
-        status: 200,
-        regNum: 'ABC123',
-        province: 'Bangkok'
-      },
-      {
-        id: '6889e1f8e1ab1caefc9be2fc',
-        action: 'extract_data_yolo',
-        timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 minutes ago
-        subId: '686756400ae6dcd28bee12af',
-        status: 200,
-        regNum: 'XYZ789',
-        province: 'Chiang Mai'
-      },
-      {
-        id: '6889ebd2e1ab1caefc9be301',
-        action: 'newdata',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1 hour ago
-        subId: '686756400ae6dcd28bee12af',
-        status: 400,
-        regNum: 'DEF456',
-        province: 'Phuket'
-      },
-      {
-        id: '6881af1ae1ab1caefc9be2ee',
-        action: 'process_image',
-        timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 minutes ago
-        subId: '686756400ae6dcd28bee12af',
-        status: 200,
-        regNum: 'GHI999',
-        province: 'Pattaya'
+        // Calculate parking duration for vehicles inside
+        const vehicleInfo = vehicleMap.get(regNum)!;
+        let parkingDuration: string | undefined;
+        let timeIn: string | undefined;
+        
+        if (status === 'INSIDE' || status === 'IN') {
+          timeIn = vehicleInfo.firstSeen;
+          const duration = Date.now() - new Date(vehicleInfo.firstSeen).getTime();
+          const hours = Math.floor(duration / (1000 * 60 * 60));
+          const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+          parkingDuration = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+        }
+
+        activities.push({
+          regNum,
+          province,
+          timestamp,
+          status,
+          parkingDuration,
+          timeIn,
+        });
+      } catch (e) {
+        // Skip invalid logs
       }
-    ];
-
-    // Add test data to logs by simulating socket events
-    testLogs.forEach((_data, index) => {
-      setTimeout(() => {
-        // Simulate receiving test data
-        // Note: In a real scenario, this would be handled by the socket connection
-        // For now, this serves as a demonstration of the data structure
-      }, index * 1000);
     });
-  };
 
-  const filterableFields = [
-    "@timestamp",
-    "@timestamp_received",
-    "client_identity",
-    "country",
-    "host",
-    "logscene_error",
-    "message",
-    "referer",
-    "request",
-    "severity",
-    "status",
-    "user_agent",
-  ];
+    return activities.reverse(); // Most recent first
+  }, [realtimeLogs]);
+
+  // Filter activities based on search
+  const filteredActivities = useMemo(() => {
+    return vehicleActivities.filter((activity) => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        activity.regNum.toLowerCase().includes(searchLower) ||
+        activity.province.toLowerCase().includes(searchLower) ||
+        activity.status.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [vehicleActivities, searchTerm]);
+
+  // Calculate KPIs
+  const kpis = useMemo(() => {
+    const today = new Date().toDateString();
+    const todayActivities = vehicleActivities.filter(
+      (activity) => new Date(activity.timestamp).toDateString() === today
+    );
+
+    const uniqueVehicles = new Set(todayActivities.map(a => a.regNum));
+    const currentlyInside = vehicleActivities.filter(a => a.status === 'INSIDE' || a.status === 'IN');
+    const insideVehicles = new Set(currentlyInside.map(a => a.regNum));
+
+    // Calculate average parking duration (only for vehicles currently inside)
+    const parkingDurations = currentlyInside
+      .filter(a => a.timeIn)
+      .map(a => Date.now() - new Date(a.timeIn!).getTime());
+    
+    const avgDuration = parkingDurations.length > 0
+      ? parkingDurations.reduce((sum, d) => sum + d, 0) / parkingDurations.length
+      : 0;
+    
+    const avgHours = Math.floor(avgDuration / (1000 * 60 * 60));
+    const avgMinutes = Math.floor((avgDuration % (1000 * 60 * 60)) / (1000 * 60));
+    const avgDurationStr = avgHours > 0 ? `${avgHours}h ${avgMinutes}m` : `${avgMinutes}m`;
+
+    // Find peak entry hour
+    const hourCounts = new Map<number, number>();
+    todayActivities
+      .filter(a => a.status === 'IN')
+      .forEach(a => {
+        const hour = new Date(a.timestamp).getHours();
+        hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
+      });
+    
+    let peakHour = 0;
+    let maxCount = 0;
+    hourCounts.forEach((count, hour) => {
+      if (count > maxCount) {
+        maxCount = count;
+        peakHour = hour;
+      }
+    });
+
+    return {
+      totalToday: uniqueVehicles.size,
+      currentlyInside: insideVehicles.size,
+      avgParkingDuration: avgDurationStr,
+      peakEntryHour: maxCount > 0 ? `${peakHour.toString().padStart(2, '0')}:00` : 'N/A',
+    };
+  }, [vehicleActivities]);
+
+  // Chart data - hourly entries for today
+  const chartData = useMemo(() => {
+    const today = new Date().toDateString();
+    const hourlyData = new Map<number, { hour: string; entries: number }>();
+
+    // Initialize 24 hours
+    for (let i = 0; i < 24; i++) {
+      hourlyData.set(i, { 
+        hour: `${i.toString().padStart(2, '0')}:00`, 
+        entries: 0
+      });
+    }
+
+    vehicleActivities.forEach((activity) => {
+      const activityDate = new Date(activity.timestamp);
+      if (activityDate.toDateString() === today && activity.status === 'IN') {
+        const hour = activityDate.getHours();
+        const data = hourlyData.get(hour)!;
+        data.entries++;
+      }
+    });
+
+    return Array.from(hourlyData.values());
+  }, [vehicleActivities]);
 
   return (
-    <div className="flex h-screen">
-      {/* Main content */}
-      <main className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-lg font-semibold">
-              Dashboard - Real-time Logs
-            </h2>
-
-            {/* Debug Info */}
-            <div className="text-xs text-gray-500">
-              Logs: {realtimeLogs.length} | Status:{" "}
-              {isConnected
-                ? "Connected"
-                : loading
-                  ? "Connecting..."
-                  : "Disconnected"}
-            </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-3">
+              <Car className="h-7 w-7 text-primary" />
+              Vehicle Monitoring Dashboard
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">Campus Parking & Access Control</p>
           </div>
-
-          <div className="flex items-center space-x-2">
-            {/* Connection Status */}
-            <div className="flex items-center space-x-2">
-              {isConnected ? (
-                <div className="flex items-center space-x-1 px-2 py-1 bg-green-100 text-green-800 rounded-md text-sm">
-                  <Wifi className="h-4 w-4" />
-                  <span>Connected</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-1 px-2 py-1 bg-red-100 text-red-800 rounded-md text-sm">
-                  <WifiOff className="h-4 w-4" />
-                  <span>Disconnected</span>
-                </div>
-              )}
-              {loading && (
-                <div className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-sm">
-                  Loading...
-                </div>
-              )}
-              {error && (
-                <div className="px-2 py-1 bg-red-100 text-red-800 rounded-md text-sm max-w-md truncate">
-                  Error: {error}
-                </div>
-              )}
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearLogs}
-              className="flex items-center gap-2"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Clear
-            </Button>
-
-            <Button variant="outline">Last 1 hr</Button>
+          
+          <div className="flex items-center gap-3">
+            {isConnected ? (
+              <div className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg border border-green-200 dark:border-green-800">
+                <Wifi className="h-4 w-4" />
+                <span className="text-sm font-medium">Live</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-800">
+                <WifiOff className="h-4 w-4" />
+                <span className="text-sm font-medium">Offline</span>
+              </div>
+            )}
+            {loading && (
+              <div className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-sm">
+                Connecting...
+              </div>
+            )}
           </div>
-        </header>
+        </div>
+      </header>
 
-   
-
-        <div className="flex-1 flex overflow-hidden">
-          {/* Dashboard Grid */}
-          <div className="flex-1 p-4 grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-y-auto">
-            {/* Main Column */}
-            <div className="lg:col-span-2 flex flex-col gap-4">
-              {/* Filter and Search */}
-              <div className="flex items-center gap-2">
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" /> Filters
-                </Button>
-                <Input
-                  placeholder="Search logs, events, types..."
-                  className="flex-1"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {/* SubId Input for manual testing */}
-                <Input
-                  placeholder="SubId (e.g. test, sample, sub001)"
-                  className="w-48"
-                  value={localSubId}
-                  onChange={(e) => setLocalSubId(e.target.value)}
-                  title="SubId is required by backend to filter logs. Try: test, sample, sub001, or check database for actual subIds"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleGetRealtimeLogs}
-                  disabled={!isConnected}
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  Get Logs
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleGetAvailableSubIds}
-                  disabled={!isConnected}
-                  className="flex items-center gap-2"
-                >
-                  📋 SubIds
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCreateTestData}
-                  className="flex items-center gap-2"
-                >
-                  🧪 Test Data
-                </Button>
-                <div className="text-sm text-gray-500">
-                  {filteredLogs.length} logs
+      {/* Main Content */}
+      <main className="p-6 space-y-6">
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm font-medium">Total Vehicles Today</p>
+                  <p className="text-4xl font-bold mt-2">{kpis.totalToday}</p>
+                </div>
+                <div className="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg">
+                  <Car className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-              
-              {/* Analytics Dashboard */}
-              <LogsAnalyticsDashboard logs={realtimeLogs} />
+            </CardContent>
+          </Card>
 
-              {/* Log Events Table */}
-              <Card>
-                <CardHeader>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm font-medium">Currently Inside</p>
+                  <p className="text-4xl font-bold mt-2">{kpis.currentlyInside}</p>
+                </div>
+                <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-lg">
+                  <Clock className="h-8 w-8 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm font-medium">Avg Parking Time</p>
+                  <p className="text-4xl font-bold mt-2">{kpis.avgParkingDuration}</p>
+                </div>
+                <div className="bg-purple-100 dark:bg-purple-900/30 p-4 rounded-lg">
+                  <Timer className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm font-medium">Peak Entry Hour</p>
+                  <p className="text-4xl font-bold mt-2">{kpis.peakEntryHour}</p>
+                </div>
+                <div className="bg-orange-100 dark:bg-orange-900/30 p-4 rounded-lg">
+                  <TrendingUp className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts and Table Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Real-time Activity Table */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <List className="h-5 w-5" />
-                    Real-time Log Events
-                    {isConnected ? (
-                      <div className="flex items-center gap-1 text-green-600">
-                        <Wifi className="h-4 w-4" />
-                        <span className="text-sm font-normal">Live</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <WifiOff className="h-4 w-4" />
-                        <span className="text-sm font-normal">Offline</span>
-                      </div>
-                    )}
+                    <ArrowDownCircle className="h-5 w-5 text-primary" />
+                    Live Vehicle Activity
                   </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="max-h-96 overflow-y-auto">
-                    <Table>
-                      <TableHeader className="sticky top-0">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Search license plate..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-64"
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="max-h-[500px] overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-muted">
+                      <TableRow>
+                        <TableHead>Time</TableHead>
+                        <TableHead>License Plate</TableHead>
+                        <TableHead>Province</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Duration</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredActivities.length === 0 ? (
                         <TableRow>
-                          <TableHead className="w-32">@timestamp</TableHead>
-                          <TableHead className="w-32">Event</TableHead>
-                          <TableHead>_source</TableHead>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground py-12">
+                            {searchTerm ? (
+                              `No vehicles found matching "${searchTerm}"`
+                            ) : (
+                              <div className="space-y-2">
+                                <Car className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                                <p className="font-medium">No vehicle activity detected</p>
+                                <p className="text-sm">Waiting for vehicles to enter...</p>
+                              </div>
+                            )}
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredLogs.length === 0 ? (
-                          <TableRow>
-                            <TableCell
-                              colSpan={3}
-                              className="text-center text-gray-500 p-8"
-                            >
-                              {searchTerm ? (
-                                `No logs found matching "${searchTerm}"`
+                      ) : (
+                        filteredActivities.slice(0, 20).map((activity, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="text-sm">
+                              {new Date(activity.timestamp).toLocaleTimeString('en-US', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </TableCell>
+                            <TableCell className="font-mono font-semibold">
+                              {activity.regNum}
+                            </TableCell>
+                            <TableCell>{activity.province}</TableCell>
+                            <TableCell>
+                              {activity.status === 'IN' ? (
+                                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                                  <ArrowDownCircle className="h-4 w-4" />
+                                  <span className="font-medium">Entry</span>
+                                </div>
+                              ) : activity.status === 'OUT' ? (
+                                <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                                  <ArrowUpCircle className="h-4 w-4" />
+                                  <span className="font-medium">Exit</span>
+                                </div>
                               ) : (
-                                <div className="space-y-2">
-                                  <div className="font-medium">
-                                    No logs available
-                                  </div>
-                                  <div className="text-xs space-y-1">
-                                    <div>
-                                      � <strong>Problem:</strong> Backend
-                                      returns empty array `[]`
-                                    </div>
-                                    <div>
-                                      💡 <strong>Solutions:</strong>
-                                    </div>
-                                    <div>
-                                      • Click <strong>"📋 Get SubIds"</strong>{" "}
-                                      to see available SubIds
-                                    </div>
-                                    <div>
-                                      • Click <strong>"➕ Create Test"</strong>{" "}
-                                      to create test data
-                                    </div>
-                                    <div>
-                                      • Try different SubId: "test", "sample",
-                                      "sub001"
-                                    </div>
-                                    <div>• Check Console for debug info</div>
-                                    <div>
-                                      📊 <strong>Current SubId:</strong> "
-                                      <span className="font-mono bg-gray-200 px-1 rounded">
-                                        {activeSubId}
-                                      </span>
-                                      "
-                                    </div>
-                                  </div>
+                                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                                  <Clock className="h-4 w-4" />
+                                  <span className="font-medium">Inside</span>
                                 </div>
                               )}
                             </TableCell>
+                            <TableCell className="text-sm">
+                              {activity.parkingDuration || '—'}
+                            </TableCell>
                           </TableRow>
-                        ) : (
-                          filteredLogs.map((log, index) => {
-                            // Parse the JSON data from log.source
-                            let parsedData: any = {};
-                            try {
-                              parsedData = typeof log.source === 'string' ? JSON.parse(log.source) : log.source;
-                            } catch (e) {
-                              parsedData = { error: 'Failed to parse data' };
-                            }
-                            
-                            return (
-                              <TableRow
-                                key={`${log.timestamp || Date.now()}-${index}`}
-                                className="hover:bg-gray-50"
-                              >
-                                <TableCell className="font-mono text-sm">
-                                  {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'No timestamp'}
-                                  <div className="text-xs text-gray-500">
-                                    {parsedData.subId || 'Unknown SubId'}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="font-mono text-sm">
-                                  <div className="flex flex-col gap-1">
-                                    <span className="px-2 py-1 rounded text-xs font-medium inline-block w-fit bg-blue-100 text-blue-800">
-                                      {parsedData.action || log.eventName || 'Unknown Action'}
-                                    </span>
-                                    {parsedData.status && (
-                                      <span className={`px-2 py-1 rounded text-xs font-medium inline-block w-fit ${
-                                        parsedData.status === 200 
-                                          ? 'bg-green-100 text-green-800' 
-                                          : 'bg-red-100 text-red-800'
-                                      }`}>
-                                        Status: {parsedData.status}
-                                      </span>
-                                    )}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="font-mono text-sm max-w-md">
-                                  <div className="truncate">
-                                    {parsedData.regNum && parsedData.province && (
-                                      <div className="text-sm">
-                                        <strong>Vehicle:</strong> {parsedData.regNum} ({parsedData.province})
-                                      </div>
-                                    )}
-                                    <div className="text-xs text-gray-600 mt-1">
-                                      <strong>ID:</strong> {parsedData.id || 'No ID'}
-                                    </div>
-                                    {parsedData.timestamp && (
-                                      <div className="text-xs text-gray-600">
-                                        <strong>Original Time:</strong> {new Date(parsedData.timestamp).toLocaleString()}
-                                      </div>
-                                    )}
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Right Sidebar */}
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Type to filter fields</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Input placeholder="Filter fields..." className="mb-4" />
-                  <div className="space-y-2">
-                    {filterableFields.map((field) => (
-                      <div
-                        key={field}
-                        className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                      >
-                        <span className="font-mono text-sm">{field}</span>
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Traffic Chart */}
+          <div className="lg:col-span-1">
+            <Card className="h-full">
+              <CardHeader className="border-b">
+                <CardTitle className="text-lg">Today's Traffic</CardTitle>
+                <p className="text-muted-foreground text-sm">Hourly vehicle entries</p>
+              </CardHeader>
+              <CardContent className="p-4">
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis 
+                      dataKey="hour" 
+                      className="text-muted-foreground"
+                      tick={{ fontSize: 10 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                    />
+                    <YAxis className="text-muted-foreground" tick={{ fontSize: 12 }} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }} 
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    />
+                    <Bar dataKey="entries" fill="hsl(var(--primary))" name="Entries" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
           </div>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+            <CardContent className="p-4">
+              <p className="text-red-600 dark:text-red-400 text-sm">⚠️ Connection Error: {error}</p>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );
