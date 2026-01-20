@@ -41,7 +41,6 @@ const LoginPage: React.FC = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      position: "",
     },
   });
 
@@ -67,7 +66,7 @@ const LoginPage: React.FC = () => {
         data.password,
         data.firstname,
         data.lastName,
-        data.position
+        ""
       );
       if (success) {
         setShowRegisterSuccess(true);
@@ -93,30 +92,42 @@ const LoginPage: React.FC = () => {
 
   return (
       <div className="min-h-screen h-screen flex flex-col justify-center items-center p-5 box-border bg-[#f4f7fc] font-sans overflow-hidden">
-      <div className="flex w-full max-w-[900px] min-w-[320px] h-fit max-h-[95vh] bg-white rounded-2xl shadow-[0_20px_80px_rgba(173,179,199,0.45)] overflow-hidden relative z-10 mx-auto">
+      <div className="flex w-full max-w-[1400px] min-w-[320px] h-fit max-h-[95vh] bg-white rounded-2xl shadow-[0_20px_80px_rgba(173,179,199,0.45)] overflow-hidden relative z-10 mx-auto">
         {/* Welcome Panel */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center items-center text-center relative bg-gradient-to-br from-indigo-500 to-purple-500 text-white p-10">
-          <h1 className="text-3xl font-bold mb-8">{isRegisterMode ? "Join Our AI Team" : "Welcome to Rival"}</h1>
-          <img
-            src="/unit.png"
-            alt="Robot Icon"
-            className="w-[320px] h-[320px] mb-4 object-contain"
-          />
+        <div className="flex-1 min-w-0 flex flex-col justify-between items-center text-center relative bg-gradient-to-br from-indigo-500 to-purple-500 text-white p-6 overflow-hidden">
+          <div className="mt-6 z-10 text-center">
+            <h1 className="text-4xl font-bold mb-2 drop-shadow-lg">
+              {isRegisterMode ? "Join Our AI LPR" : "Welcome to AI LPR"}
+            </h1>
+            <p className="text-white/95 text-lg font-light tracking-wide drop-shadow-md">
+              {isRegisterMode
+                ? "Sign up for the AI LPR system to enhance security and efficiency"
+                : "Advanced License Plate Recognition System"}
+            </p>
+          </div>
+          <div className="flex-1 flex items-center justify-center w-full">
+            <img
+              src="/AI-LPR.png"
+              alt="AI LPR System"
+              className="w-full h-auto max-w-[600px] max-h-[500px] md:max-h-[550px] object-contain"
+            />
+          </div>
+          <div className="h-4" />
         </div>
 
         {/* Login/Register Panel */}
-        <div className="flex-1 p-12 min-w-0 min-h-[320px] box-border flex flex-col justify-center items-center bg-white">
+        <div className="flex-1 p-6 min-w-0 min-h-[320px] box-border flex flex-col justify-center items-center bg-white">
           {isRegisterMode ? (
             <form
-              className="w-full max-w-[380px] flex flex-col items-center text-center"
+              className="w-full max-w-[380px] flex flex-col items-center text-center min-h-[620px] justify-center"
               onSubmit={registerForm.handleSubmit(handleRegisterSubmit)}
             >
               <img
-                src="/unit-logo.png"
+                src="/LPR Eye-logo.png"
                 alt="Register Logo"
-                className="w-24 h-24 object-contain mx-auto mb-4"
+                className="w-[260px] h-auto mx-auto mb-4"
               />
-              <div className="w-full flex gap-2 mb-4">
+              <div className="w-full flex gap-2 mb-2">
                 <div className="flex-1">
                   <input
                     type="text"
@@ -124,12 +135,14 @@ const LoginPage: React.FC = () => {
                     {...registerForm.register("firstname")}
                     className={`w-full p-3 border rounded-xl bg-white text-base text-gray-800 transition focus:outline-none focus:border-indigo-500 ${registerForm.formState.errors.firstname ? "border-red-500" : "border-gray-200"}`}
                   />
-                  {registerForm.formState.errors.firstname && (
-                    <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {registerForm.formState.errors.firstname.message}
-                    </span>
-                  )}
+                  <div className="h-5">
+                    {registerForm.formState.errors.firstname && (
+                      <span className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {registerForm.formState.errors.firstname.message}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex-1">
                   <input
@@ -138,29 +151,33 @@ const LoginPage: React.FC = () => {
                     {...registerForm.register("lastName")}
                     className={`w-full p-3 border rounded-xl bg-white text-base text-gray-800 transition focus:outline-none focus:border-indigo-500 ${registerForm.formState.errors.lastName ? "border-red-500" : "border-gray-200"}`}
                   />
-                  {registerForm.formState.errors.lastName && (
-                    <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {registerForm.formState.errors.lastName.message}
-                    </span>
-                  )}
+                  <div className="h-5">
+                    {registerForm.formState.errors.lastName && (
+                      <span className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {registerForm.formState.errors.lastName.message}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="w-full mb-4">
+              <div className="w-full mb-2">
                 <input
                   type="email"
                   placeholder="Email"
                   {...registerForm.register("email")}
                   className={`w-full p-3 border rounded-xl bg-white text-base text-gray-800 transition focus:outline-none focus:border-indigo-500 ${registerForm.formState.errors.email ? "border-red-500" : "border-gray-200"}`}
                 />
-                {registerForm.formState.errors.email && (
-                  <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {registerForm.formState.errors.email.message}
-                  </span>
-                )}
+                <div className="h-5">
+                  {registerForm.formState.errors.email && (
+                    <span className="text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {registerForm.formState.errors.email.message}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="w-full mb-4 relative">
+              <div className="w-full mb-2 relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
@@ -169,21 +186,23 @@ const LoginPage: React.FC = () => {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  className="absolute right-3 top-[24px] -translate-y-1/2 text-gray-400"
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex={-1}
                   disabled={isLoading}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
-                {registerForm.formState.errors.password && (
-                  <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {registerForm.formState.errors.password.message}
-                  </span>
-                )}
+                <div className="h-5">
+                  {registerForm.formState.errors.password && (
+                    <span className="text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {registerForm.formState.errors.password.message}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="w-full mb-4 relative">
+              <div className="w-full mb-2 relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm Password"
@@ -192,33 +211,21 @@ const LoginPage: React.FC = () => {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  className="absolute right-3 top-[24px] -translate-y-1/2 text-gray-400"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   tabIndex={-1}
                   disabled={isLoading}
                 >
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
-                {registerForm.formState.errors.confirmPassword && (
-                  <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {registerForm.formState.errors.confirmPassword.message}
-                  </span>
-                )}
-              </div>
-              <div className="w-full mb-4">
-                <input
-                  type="text"
-                  placeholder="Position"
-                  {...registerForm.register("position")}
-                  className={`w-full p-3 border rounded-xl bg-white text-base text-gray-800 transition focus:outline-none focus:border-indigo-500 ${registerForm.formState.errors.position ? "border-red-500" : "border-gray-200"}`}
-                />
-                {registerForm.formState.errors.position && (
-                  <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {registerForm.formState.errors.position.message}
-                  </span>
-                )}
+                <div className="h-5">
+                  {registerForm.formState.errors.confirmPassword && (
+                    <span className="text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {registerForm.formState.errors.confirmPassword.message}
+                    </span>
+                  )}
+                </div>
               </div>
               {registerForm.formState.errors.root && (
                 <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 flex items-center gap-2 mb-5">
@@ -226,22 +233,21 @@ const LoginPage: React.FC = () => {
                   <span>{registerForm.formState.errors.root.message}</span>
                 </div>
               )}
-              <div className="h-[1px] w-full bg-gradient-to-r from-indigo-200 via-gray-100 to-cyan-200 my-6" />
               <button
                 type="submit"
-                className="w-full p-4 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-400 text-white font-bold uppercase shadow-lg hover:-translate-y-1 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="w-full p-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-500 text-white font-bold uppercase shadow-lg hover:-translate-y-1 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                 disabled={isLoading || registerForm.formState.isSubmitting}
               >
                 {isLoading || registerForm.formState.isSubmitting
                   ? "Registering..."
                   : "REGISTER"}
               </button>
-              <div className="mt-4">
+              <div className="mt-2">
                 <p>
                   Already have an account?{" "}
                   <button
                     type="button"
-                    className="text-indigo-500 hover:underline font-semibold"
+                    className="text-indigo-500 hover:underline font-medium"
                     onClick={() => setIsRegisterMode(false)}
                   >
                     Login here
@@ -250,73 +256,76 @@ const LoginPage: React.FC = () => {
               </div>
             </form>
           ) : (
-            <div className="w-full max-w-[380px] mx-auto">
+            <form
+              className="w-full max-w-[380px] flex flex-col items-center text-center justify-center min-h-[620px]"
+              onSubmit={loginForm.handleSubmit(handleLoginSubmit)}
+            >
               <img
-                src="/unit-logo.png"
+                src="/LPR Eye-logo.png"
                 alt="Unit Icon"
-                className="w-24 h-24 object-contain mx-auto mb-4"
+                className="w-[260px] h-auto mx-auto mb-4"
               />
-              <form
-                onSubmit={loginForm.handleSubmit(handleLoginSubmit)}
-                className="flex flex-col gap-4"
-              >
-                <div>
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    placeholder="Email"
-                    {...loginForm.register("email")}
-                    className={`w-full p-3 border rounded-xl bg-white text-base text-gray-800 transition focus:outline-none focus:border-indigo-500 ${loginForm.formState.errors.email ? "border-red-500" : "border-gray-200"}`}
-                  />
+              <div className="w-full mb-2">
+                <input
+                  type="email"
+                  autoComplete="email"
+                  placeholder="Email"
+                  {...loginForm.register("email")}
+                  className={`w-full p-3 border rounded-xl bg-white text-base text-gray-800 transition focus:outline-none focus:border-indigo-500 ${loginForm.formState.errors.email ? "border-red-500" : "border-gray-200"}`}
+                />
+                <div className="h-5">
                   {loginForm.formState.errors.email && (
-                    <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                    <span className="text-sm text-red-600 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {loginForm.formState.errors.email.message}
                     </span>
                   )}
                 </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    {...loginForm.register("password")}
-                    className={`w-full p-3 border rounded-xl bg-white text-base text-gray-800 transition focus:outline-none focus:border-indigo-500 ${loginForm.formState.errors.password ? "border-red-500" : "border-gray-200"}`}
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
-                    disabled={isLoading}
-                  >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
-                  </button>
+              </div>
+              <div className="w-full mb-2 relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  {...loginForm.register("password")}
+                  className={`w-full p-3 border rounded-xl bg-white text-base text-gray-800 transition focus:outline-none focus:border-indigo-500 ${loginForm.formState.errors.password ? "border-red-500" : "border-gray-200"}`}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-[24px] -translate-y-1/2 text-gray-400"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  disabled={isLoading}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+                <div className="h-5">
                   {loginForm.formState.errors.password && (
-                    <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                    <span className="text-sm text-red-600 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {loginForm.formState.errors.password.message}
                     </span>
                   )}
                 </div>
+              </div>
                 {loginForm.formState.errors.root && (
                   <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 flex items-center gap-2 mb-5">
                     <FaExclamationCircle className="w-4 h-4" />
                     <span>{loginForm.formState.errors.root.message}</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between text-sm mb-2">
-                  <label className="flex items-center gap-2 font-semibold text-gray-700 cursor-pointer">
+                <div className="w-full flex items-center justify-between text-sm mb-3">
+                  <label className="flex items-center gap-2 font-medium text-gray-700 cursor-pointer whitespace-nowrap">
                     <input
                       type="checkbox"
                       {...loginForm.register("rememberMe")}
                       disabled={isLoading}
-                      className="accent-indigo-500"
+                      className="accent-indigo-500 flex-shrink-0"
                     />
-                    Remember me
+                    <span>Remember me</span>
                   </label>
                   <button
                     type="button"
-                    className="text-indigo-500 hover:underline font-semibold"
+                    className="text-gray-400 hover:text-gray-600 hover:underline font-medium transition-colors whitespace-nowrap ml-2"
                     onClick={() =>
                       alert(
                         "Forgot password functionality would be implemented here."
@@ -327,22 +336,21 @@ const LoginPage: React.FC = () => {
                     Forgot your password?
                   </button>
                 </div>
-                <div className="h-[1px] w-full bg-gradient-to-r from-indigo-200 via-gray-100 to-cyan-200 my-6" />
                 <button
                   type="submit"
-                  className="w-full p-4 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-400 text-white font-bold uppercase shadow-lg hover:-translate-y-1 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="w-full p-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-500 text-white font-bold uppercase shadow-lg hover:-translate-y-1 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                   disabled={loginForm.formState.isSubmitting}
                 >
                   {isLoading || loginForm.formState.isSubmitting
                     ? "Signing in..."
                     : "LOGIN"}
                 </button>
-                <div className="mt-4">
+                <div className="mt-2">
                   <p>
                     Don't have an account?{" "}
                     <button
                       type="button"
-                      className="text-indigo-500 hover:underline font-semibold"
+                      className="text-indigo-500 hover:underline font-medium"
                       onClick={() => setIsRegisterMode(true)}
                     >
                       Register now
@@ -350,14 +358,13 @@ const LoginPage: React.FC = () => {
                   </p>
                 </div>
               </form>
-            </div>
           )}
         </div>
       </div>
 
       {/* Footer */}
       <footer className="w-full text-center text-gray-400 text-xs mt-8">
-        © 2024 - {new Date().getFullYear()} UNIT Co.,Ltd. All rights reserved.
+        © 2024 - {new Date().getFullYear()} RMUTP All rights reserved..
       </footer>
 
       {/* Registration Success Popup */}

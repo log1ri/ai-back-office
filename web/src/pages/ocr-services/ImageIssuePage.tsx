@@ -45,7 +45,6 @@ export default function ImageIssuePage() {
             Image Issues
           </h1>
           <p className=" truncate">Images that have problems and need correction</p>
-          <p className=" truncate text-sm">Organization: <span className="font-semibold">{subId}</span></p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -60,7 +59,7 @@ export default function ImageIssuePage() {
           </div>
 
           {/* Filter Dropdown */}
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="bg-white whitespace-nowrap">
                 <SlidersHorizontal className="w-4 h-4 mr-2" />

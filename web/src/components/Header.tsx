@@ -25,13 +25,6 @@ function Header({ onToggleTheme, theme }: HeaderProps) {
       if (pathname.includes("/overview")) return "Dashboard";
       if (pathname.includes("/home")) return "Image Log";
       if (pathname.includes("/issues")) return "Image Issues";
-      if (pathname.includes("/price")) return "Price Management";
-      if (pathname.includes("/api-docs")) {
-        if (pathname.includes("/usage-examples")) return "Usage Examples";
-        if (pathname.includes("/best-practices")) return "Best Practices";
-        if (pathname.includes("/changelog")) return "Changelog";
-        return "ApiDocs";
-      }
       if (pathname === "/ocr-services" || pathname === "/ocr-services/") return "OCR Services";
     }
     
@@ -48,12 +41,6 @@ function Header({ onToggleTheme, theme }: HeaderProps) {
   const pageName = getPageName(location.pathname);
   const orgId = getOrgName(location.pathname);
   
-  // Check if we're in a nested ApiDocs page
-  const isApiDocsSubpage = location.pathname.includes("/api-docs/") && 
-    (location.pathname.includes("/usage-examples") || 
-     location.pathname.includes("/best-practices") || 
-     location.pathname.includes("/changelog"));
-
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2 px-4 justify-between w-full">
@@ -81,28 +68,6 @@ function Header({ onToggleTheme, theme }: HeaderProps) {
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   
-                  {/* If we're in ApiDocs subpage, show ApiDocs as intermediate level */}
-                  {isApiDocsSubpage && (
-                    <>
-                      <BreadcrumbSeparator className="hidden md:block" />
-                      <BreadcrumbItem className="hidden md:block">
-                        <BreadcrumbLink href={`/ocr-services/${orgId}/api-docs`}>
-                          ApiDocs
-                        </BreadcrumbLink>
-                      </BreadcrumbItem>
-                    </>
-                  )}
-                  
-                  <BreadcrumbSeparator className="hidden md:block" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>{pageName}</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </>
-              )}
-              
-              {/* For non-OCR routes, just show the page name */}
-              {!orgId && (
-                <>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
                     <BreadcrumbPage>{pageName}</BreadcrumbPage>

@@ -1,0 +1,13 @@
+{
+  "lockfileVersion": 1,
+  "workspaces": {
+    "": {
+      "devDependencies": {
+        "baseline-browser-mapping": "^2.9.12",
+      },
+    },
+  },
+  "packages": {
+    "baseline-browser-mapping": ["baseline-browser-mapping@2.9.12", "", { "bin": "dist/cli.js" }, "sha512-Mij6Lij93pTAIsSYy5cyBQ975Qh9uLEc5rwGTpomiZeXZL9yIS6uORJakb3ScHgfs0serMMfIbXzokPMuEiRyw=="],
+  }
+}

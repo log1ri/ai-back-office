@@ -1,5 +1,3 @@
-import { BarChart3, ImageIcon, AlertTriangle, CloudCog, BookOpen, Lightbulb, History, DollarSign  } from "lucide-react";
-
 export const SIDEBAR_CONFIG = {
   DEFAULT_OPEN: true,
   COLLAPSIBLE: 'icon' as const,
@@ -17,45 +15,19 @@ export const PROJECT_NAVIGATION_ITEMS = [
   {
     name: 'Overview',
     url: '/overview',
-    icon: BarChart3,
     current: false,
+  },
+  {
+    name: 'Sessions',
+    url: '/sessions',
   },
   {
     name: 'Image Log',
     url: '/home',
-    icon: ImageIcon,
   },
   {
     name: 'Image Issue',
-    url: '/issues', // Changed from '/about' to '/issues' for clarity
-    icon: AlertTriangle,
-  },
-  {
-    name: 'Price Management',
-    url: '/price',
-    icon: DollarSign,
-  },
-  {
-    name: 'ApiDocs',
-    url: '/api-docs',
-    icon: CloudCog ,
-    children: [
-      {
-        name: 'Usage Examples',
-        url: '/usage-examples',
-        icon: BookOpen,
-      },
-      {
-        name: 'Best Practices',
-        url: '/best-practices',
-        icon: Lightbulb,
-      },
-      {
-        name: 'Changelog',
-        url: '/changelog',
-        icon: History,
-      }
-    ]
+    url: '/issues',
   },
 ] as const;
 
@@ -68,24 +40,10 @@ export const SIDEBAR_LABELS = {
 } as const;
 
 export const USER_MENU_ITEMS = [
-  { key: 'upgrade', label: 'Upgrade to Pro', icon: 'Sparkles' },
-  { key: 'account', label: 'Account', icon: 'BadgeCheck' },
-  { key: 'billing', label: 'Billing', icon: 'CreditCard' },
-  { key: 'notifications', label: 'Notifications', icon: 'Bell' },
   { key: 'logout', label: 'Log out', icon: 'LogOut' },
 ] as const;
 
-export const PROJECT_MENU_ITEMS = [
-  { key: 'view', label: 'View Project', icon: 'Folder' },
-  { key: 'share', label: 'Share Project', icon: 'Forward' },
-  { key: 'delete', label: 'Delete Project', icon: 'Trash2' },
-] as const;
-
-export const ANIMATION_CONFIG = {
-  TRANSITION_DURATION: 200,
-  EASE: 'ease-linear',
-  HOVER_DELAY: 100,
-} as const;
+export const PROJECT_MENU_ITEMS = [] as const;
 
 export const BREAKPOINTS = {
   MOBILE: 768,

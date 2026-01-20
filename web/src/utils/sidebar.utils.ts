@@ -101,11 +101,6 @@ export const buildProjectUrls = (projects: ProjectItem[], activeTeam: Team | nul
       url = `/ocr-services/${orgId}/home`;
     } else if (url === '/issues') {
       url = `/ocr-services/${orgId}/issues`;
-    } else if (url === '/api-docs') {
-      // Hard code fix for children
-      if (children[0]) children[0].url = `/ocr-services/api-docs/usage-examples`;
-      if (children[1]) children[1].url = `/ocr-services/api-docs/best-practices`;
-      if (children[2]) children[2].url = `/ocr-services/api-docs/changelog`;
     } else {
       url = `/ocr-services/${orgId}${project.url}`;
     }

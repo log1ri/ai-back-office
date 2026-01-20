@@ -1,20 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PriceManagementPage } from '../../pages/ocr-services/PriceManangementPage'
+import SessionPage from '../../pages/ocr-services/SessionPage'
 import ProtectedRoute from '../../components/ProtectedRoute';
 import AppLayout from '../../components/AppLayout';
 
-export const Route = createFileRoute('/ocr-services/$orgld/price')({
+export const Route = createFileRoute("/ocr-services/$orgId/sessions")({
   component: () => (
     <ProtectedRoute>
       <AppLayout>
-        <PriceManagementPage />
+        <SessionPage />
       </AppLayout>
     </ProtectedRoute>
   ),
   beforeLoad: ({ params }) => {
-    console.log('Price Management route beforeLoad, orgId:', params.orgld);
-    // Validate orgId parameter exists
-    if (!params.orgld) {
+    console.log('Sessions route beforeLoad, orgId:', params.orgId);
+    if (!params.orgId) {
       throw new Error('Organization ID is required');
     }
   },

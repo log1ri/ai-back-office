@@ -122,6 +122,55 @@ export interface listRateItem{
   whoIsCreate: string
 }
 
+// Session interfaces for parking monitoring
+export interface VehicleSession {
+  id: string;
+  organization: string;
+  subId: string;
+  reg_num: string;
+  province: string;
+  status: string; // CONFLICT, COMPLETED, ONGOING, etc.
+  entry: {
+    time: string;
+    camId: string;
+    logId: string;
+  } | null;
+  exit: {
+    time: string;
+    camId: string;
+    logId: string;
+  } | null;
+  durationSec: number | null;
+  lastSeenAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SessionResponse {
+  data: VehicleSession[];
+  total_records: number;
+  current_page: number;
+  total_pages: number;
+  next_page: number | null;
+  prev_page: number | null;
+}
+
+export interface SessionFilters {
+  search?: string; // for reg_num search
+  status?: string; // OPEN, CLOSED, CONFLICT, ABANDONED
+  page?: number;
+  limit?: number;
+  sortBy?: 'durationSec' | 'lastSeenAt' | 'createdAt' | 'updatedAt';
+  order?: 'asc' | 'desc';
+}
+
+export interface SessionStats {
+  totalSessions: number;
+  ongoingSessions: number;
+  completedSessions: number;
+  averageDuration: number;
+}
+
 // Error handling
 export class ApiError extends Error {
   public status: number;
