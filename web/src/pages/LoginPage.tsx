@@ -126,7 +126,7 @@ const LoginPage: React.FC = () => {
               <img
                 src="/LPR Eye-logo.png"
                 alt="Register Logo"
-                className="w-24 h-24 object-contain mx-auto mb-2"
+                className="w-48 h-48 object-contain mx-auto mb-2"
               />
               <div className="w-full flex gap-2 mb-2">
                 <div className="flex-1">
@@ -265,7 +265,7 @@ const LoginPage: React.FC = () => {
               <img
                 src="/LPR Eye-logo.png"
                 alt="Unit Icon"
-                className="w-24 h-24 object-contain mx-auto mb-2"
+                className="w-48 h-48 object-contain mx-auto mb-2"
               />
               <form
                 onSubmit={loginForm.handleSubmit(handleLoginSubmit)}
@@ -367,7 +367,7 @@ const LoginPage: React.FC = () => {
 
       {/* Footer */}
       <footer className="w-full text-center text-gray-400 text-xs mt-8">
-        © 2024 - {new Date().getFullYear()} UNIT Co.,Ltd. All rights reserved.
+        © 2024 - {new Date().getFullYear()} @RMUTP All rights reserved.
       </footer>
 
       {/* Registration Success Popup */}

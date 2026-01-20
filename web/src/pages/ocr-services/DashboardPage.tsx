@@ -8,13 +8,9 @@ import {
 import { Input } from "../../components/ui/input";
 import {
   Car,
-  Wifi,
-  WifiOff,
   ArrowDownCircle,
   ArrowUpCircle,
   Clock,
-  Timer,
-  TrendingUp,
 } from "lucide-react";
 import {
   Table,
@@ -24,161 +20,48 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { useRealtimeLogs } from "../../hooks/useRealtimeLogs";
 import { useSubIdContext } from "../../contexts/SubIdContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-interface VehicleActivity {
-  regNum: string;
-  province: string;
-  timestamp: string;
-  status: 'IN' | 'OUT' | 'INSIDE';
-  parkingDuration?: string;
-  timeIn?: string;
-}
+import { useDashboardStats, useTodaySessions } from "../../hooks/useDashboardStats";
+import { format } from "date-fns";
 
 export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { subId: contextSubId } = useSubIdContext();
+  const { subId } = useSubIdContext();
 
+  // Fetch dashboard statistics
   const {
-    logs: realtimeLogs,
-    isConnected,
-    loading,
-    error,
-  } = useRealtimeLogs({
-    baseUrl: "http://localhost:5167",
-    maxLogs: 100,
-  });
+    currentlyInside,
+    sessionCountToday,
+    peakHour,
+    avgParkingTimeSec,
+  } = useDashboardStats(subId || "");
 
-  // Process logs to extract vehicle activities
-  const vehicleActivities = useMemo<VehicleActivity[]>(() => {
-    const activities: VehicleActivity[] = [];
-    const vehicleMap = new Map<string, { firstSeen: string; lastSeen: string; isInside: boolean }>();
+  // Fetch today's sessions with search
+  const { data: sessionsData, isLoading, error } = useTodaySessions(subId || "", searchTerm);
 
-    realtimeLogs.forEach((log) => {
-      try {
-        const parsedData = typeof log.source === 'string' ? JSON.parse(log.source) : log.source;
-        const regNum = parsedData.regNum || 'UNKNOWN';
-        const province = parsedData.province || 'N/A';
-        const timestamp = parsedData.timestamp || log.timestamp;
-        const action = parsedData.action || '';
-
-        // Track vehicle state
-        if (!vehicleMap.has(regNum)) {
-          vehicleMap.set(regNum, { 
-            firstSeen: timestamp,
-            lastSeen: timestamp,
-            isInside: action.includes('in') || action.includes('entry')
-          });
-        } else {
-          const vehicle = vehicleMap.get(regNum)!;
-          vehicle.lastSeen = timestamp;
-          vehicle.isInside = action.includes('in') || action.includes('entry');
-        }
-
-        // Determine status
-        let status: 'IN' | 'OUT' | 'INSIDE' = 'INSIDE';
-        if (action.includes('out') || action.includes('exit')) {
-          status = 'OUT';
-        } else if (action.includes('in') || action.includes('entry')) {
-          status = 'IN';
-        }
-
-        // Calculate parking duration for vehicles inside
-        const vehicleInfo = vehicleMap.get(regNum)!;
-        let parkingDuration: string | undefined;
-        let timeIn: string | undefined;
-        
-        if (status === 'INSIDE' || status === 'IN') {
-          timeIn = vehicleInfo.firstSeen;
-          const duration = Date.now() - new Date(vehicleInfo.firstSeen).getTime();
-          const hours = Math.floor(duration / (1000 * 60 * 60));
-          const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-          parkingDuration = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-        }
-
-        activities.push({
-          regNum,
-          province,
-          timestamp,
-          status,
-          parkingDuration,
-          timeIn,
-        });
-      } catch (e) {
-        // Skip invalid logs
-      }
-    });
-
-    return activities.reverse(); // Most recent first
-  }, [realtimeLogs]);
-
-  // Filter activities based on search
-  const filteredActivities = useMemo(() => {
-    return vehicleActivities.filter((activity) => {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        activity.regNum.toLowerCase().includes(searchLower) ||
-        activity.province.toLowerCase().includes(searchLower) ||
-        activity.status.toLowerCase().includes(searchLower)
-      );
-    });
-  }, [vehicleActivities, searchTerm]);
-
-  // Calculate KPIs
-  const kpis = useMemo(() => {
-    const today = new Date().toDateString();
-    const todayActivities = vehicleActivities.filter(
-      (activity) => new Date(activity.timestamp).toDateString() === today
-    );
-
-    const uniqueVehicles = new Set(todayActivities.map(a => a.regNum));
-    const currentlyInside = vehicleActivities.filter(a => a.status === 'INSIDE' || a.status === 'IN');
-    const insideVehicles = new Set(currentlyInside.map(a => a.regNum));
-
-    // Calculate average parking duration (only for vehicles currently inside)
-    const parkingDurations = currentlyInside
-      .filter(a => a.timeIn)
-      .map(a => Date.now() - new Date(a.timeIn!).getTime());
+  // Format duration from seconds
+  const formatDuration = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     
-    const avgDuration = parkingDurations.length > 0
-      ? parkingDurations.reduce((sum, d) => sum + d, 0) / parkingDurations.length
-      : 0;
-    
-    const avgHours = Math.floor(avgDuration / (1000 * 60 * 60));
-    const avgMinutes = Math.floor((avgDuration % (1000 * 60 * 60)) / (1000 * 60));
-    const avgDurationStr = avgHours > 0 ? `${avgHours}h ${avgMinutes}m` : `${avgMinutes}m`;
+    if (hours === 0) return `${mins}m`;
+    if (mins === 0) return `${hours}h`;
+    return `${hours}h ${mins}m`;
+  };
 
-    // Find peak entry hour
-    const hourCounts = new Map<number, number>();
-    todayActivities
-      .filter(a => a.status === 'IN')
-      .forEach(a => {
-        const hour = new Date(a.timestamp).getHours();
-        hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
-      });
-    
-    let peakHour = 0;
-    let maxCount = 0;
-    hourCounts.forEach((count, hour) => {
-      if (count > maxCount) {
-        maxCount = count;
-        peakHour = hour;
-      }
-    });
-
-    return {
-      totalToday: uniqueVehicles.size,
-      currentlyInside: insideVehicles.size,
-      avgParkingDuration: avgDurationStr,
-      peakEntryHour: maxCount > 0 ? `${peakHour.toString().padStart(2, '0')}:00` : 'N/A',
-    };
-  }, [vehicleActivities]);
+  // Calculate current duration for ongoing sessions
+  const getCurrentDuration = (entryTime: string): string => {
+    const start = new Date(entryTime);
+    const now = new Date();
+    const diffSeconds = Math.floor((now.getTime() - start.getTime()) / 1000);
+    return formatDuration(diffSeconds);
+  };
 
   // Chart data - hourly entries for today
   const chartData = useMemo(() => {
-    const today = new Date().toDateString();
+    if (!sessionsData?.data) return [];
+
     const hourlyData = new Map<number, { hour: string; entries: number }>();
 
     // Initialize 24 hours
@@ -189,17 +72,16 @@ export default function DashboardPage() {
       });
     }
 
-    vehicleActivities.forEach((activity) => {
-      const activityDate = new Date(activity.timestamp);
-      if (activityDate.toDateString() === today && activity.status === 'IN') {
-        const hour = activityDate.getHours();
+    sessionsData.data.forEach((session) => {
+      if (session.entry?.time) {
+        const hour = new Date(session.entry.time).getHours();
         const data = hourlyData.get(hour)!;
         data.entries++;
       }
     });
 
     return Array.from(hourlyData.values());
-  }, [vehicleActivities]);
+  }, [sessionsData]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -212,25 +94,6 @@ export default function DashboardPage() {
             </h1>
             <p className="text-muted-foreground text-sm mt-1">Campus Parking & Access Control</p>
           </div>
-          
-          <div className="flex items-center gap-3">
-            {isConnected ? (
-              <div className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg border border-green-200 dark:border-green-800">
-                <Wifi className="h-4 w-4" />
-                <span className="text-sm font-medium">Live</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-800">
-                <WifiOff className="h-4 w-4" />
-                <span className="text-sm font-medium">Offline</span>
-              </div>
-            )}
-            {loading && (
-              <div className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-sm">
-                Connecting...
-              </div>
-            )}
-          </div>
         </div>
       </header>
 
@@ -242,7 +105,7 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <div>
                 <p className="text-muted-foreground text-sm font-medium">Total Vehicles Today</p>
-                <p className="text-4xl font-bold mt-2">{kpis.totalToday}</p>
+                <p className="text-4xl font-bold mt-2">{sessionCountToday}</p>
               </div>
             </CardContent>
           </Card>
@@ -251,7 +114,7 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <div>
                 <p className="text-muted-foreground text-sm font-medium">Currently Inside</p>
-                <p className="text-4xl font-bold mt-2">{kpis.currentlyInside}</p>
+                <p className="text-4xl font-bold mt-2">{currentlyInside}</p>
               </div>
             </CardContent>
           </Card>
@@ -259,8 +122,8 @@ export default function DashboardPage() {
           <Card>
             <CardContent className="p-6">
               <div>
-                <p className="text-muted-foreground text-sm font-medium">Avg Parking Time</p>
-                <p className="text-4xl font-bold mt-2">{kpis.avgParkingDuration}</p>
+                <p className="text-muted-foreground text-sm font-medium">Avg Parking Time (7d)</p>
+                <p className="text-4xl font-bold mt-2">{formatDuration(avgParkingTimeSec)}</p>
               </div>
             </CardContent>
           </Card>
@@ -268,8 +131,10 @@ export default function DashboardPage() {
           <Card>
             <CardContent className="p-6">
               <div>
-                <p className="text-muted-foreground text-sm font-medium">Peak Entry Hour</p>
-                <p className="text-4xl font-bold mt-2">{kpis.peakEntryHour}</p>
+                <p className="text-muted-foreground text-sm font-medium">Peak Entry Hour (7d)</p>
+                <p className="text-4xl font-bold mt-2">
+                  {peakHour !== null ? `${peakHour.toString().padStart(2, '0')}:00` : 'N/A'}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -308,7 +173,22 @@ export default function DashboardPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredActivities.length === 0 ? (
+                      {isLoading ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground py-12">
+                            <div className="flex items-center justify-center">
+                              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                              <span className="ml-3">Loading...</span>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : error ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-red-500 py-12">
+                            Error loading data
+                          </TableCell>
+                        </TableRow>
+                      ) : !sessionsData?.data || sessionsData.data.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center text-muted-foreground py-12">
                             {searchTerm ? (
@@ -323,38 +203,41 @@ export default function DashboardPage() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredActivities.slice(0, 20).map((activity, index) => (
-                          <TableRow key={index}>
+                        sessionsData.data.map((session) => (
+                          <TableRow key={session.id}>
                             <TableCell className="text-sm">
-                              {new Date(activity.timestamp).toLocaleTimeString('en-US', { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                              })}
+                              {session.entry?.time 
+                                ? format(new Date(session.entry.time), "HH:mm:ss")
+                                : session.exit?.time
+                                ? format(new Date(session.exit.time), "HH:mm:ss")
+                                : '-'}
                             </TableCell>
                             <TableCell className="font-mono font-semibold">
-                              {activity.regNum}
+                              {session.reg_num}
                             </TableCell>
-                            <TableCell>{activity.province}</TableCell>
+                            <TableCell>{session.province}</TableCell>
                             <TableCell>
-                              {activity.status === 'IN' ? (
-                                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                                  <ArrowDownCircle className="h-4 w-4" />
-                                  <span className="font-medium">Entry</span>
-                                </div>
-                              ) : activity.status === 'OUT' ? (
-                                <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                                  <ArrowUpCircle className="h-4 w-4" />
-                                  <span className="font-medium">Exit</span>
-                                </div>
-                              ) : (
+                              {session.status === 'ONGOING' || !session.exit ? (
                                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                                   <Clock className="h-4 w-4" />
                                   <span className="font-medium">Inside</span>
                                 </div>
+                              ) : session.status === 'COMPLETED' ? (
+                                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                                  <ArrowUpCircle className="h-4 w-4" />
+                                  <span className="font-medium">Completed</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                                  <ArrowDownCircle className="h-4 w-4" />
+                                  <span className="font-medium">{session.status}</span>
+                                </div>
                               )}
                             </TableCell>
                             <TableCell className="text-sm">
-                              {activity.parkingDuration || '—'}
+                              {session.durationSec !== null 
+                                ? formatDuration(session.durationSec)
+                                : (session.entry?.time ? getCurrentDuration(session.entry.time) : '—')}
                             </TableCell>
                           </TableRow>
                         ))
@@ -401,15 +284,6 @@ export default function DashboardPage() {
             </Card>
           </div>
         </div>
-
-        {/* Error Display */}
-        {error && (
-          <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
-            <CardContent className="p-4">
-              <p className="text-red-600 dark:text-red-400 text-sm">⚠️ Connection Error: {error}</p>
-            </CardContent>
-          </Card>
-        )}
       </main>
     </div>
   );

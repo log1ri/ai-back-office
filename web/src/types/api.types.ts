@@ -156,13 +156,11 @@ export interface SessionResponse {
 }
 
 export interface SessionFilters {
-  startDate?: string;
-  endDate?: string;
   search?: string; // for reg_num search
-  status?: string;
+  status?: string; // OPEN, CLOSED, CONFLICT, ABANDONED
   page?: number;
   limit?: number;
-  sortBy?: string;
+  sortBy?: 'durationSec' | 'lastSeenAt' | 'createdAt' | 'updatedAt';
   order?: 'asc' | 'desc';
 }
 

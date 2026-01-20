@@ -42,6 +42,8 @@ export default function SessionPage() {
     status: "",
     page: 1,
     limit: 10,
+    sortBy: "lastSeenAt",
+    order: "desc",
   });
   
   const [selectedSession, setSelectedSession] = useState<VehicleSession | null>(null);
@@ -107,6 +109,8 @@ export default function SessionPage() {
       status: "",
       page: 1,
       limit: 10,
+      sortBy: "lastSeenAt",
+      order: "desc",
     });
   };
 
@@ -199,7 +203,7 @@ export default function SessionPage() {
             <CardTitle>Filters</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   License Plate
@@ -226,9 +230,50 @@ export default function SessionPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="OPEN">Open</SelectItem>
+                    <SelectItem value="CLOSED">Closed</SelectItem>
                     <SelectItem value="CONFLICT">Conflict</SelectItem>
-                    <SelectItem value="COMPLETED">Completed</SelectItem>
-                    <SelectItem value="ONGOING">Ongoing</SelectItem>
+                    <SelectItem value="ABANDONED">Abandoned</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Sort By */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Sort By
+                </label>
+                <Select
+                  value={filters.sortBy || "lastSeenAt"}
+                  onValueChange={(value: any) => handleFilterChange("sortBy", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lastSeenAt">Last Seen</SelectItem>
+                    <SelectItem value="durationSec">Duration</SelectItem>
+                    <SelectItem value="createdAt">Created Date</SelectItem>
+                    <SelectItem value="updatedAt">Updated Date</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Order */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Order
+                </label>
+                <Select
+                  value={filters.order || "desc"}
+                  onValueChange={(value: any) => handleFilterChange("order", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Order" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desc">Descending</SelectItem>
+                    <SelectItem value="asc">Ascending</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -309,13 +354,15 @@ export default function SessionPage() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={session.status === "CONFLICT" ? "default" : "secondary"}
+                            variant="secondary"
                             className={
                               session.status === "CONFLICT"
-                                ? "bg-orange-500 hover:bg-orange-600"
-                                : session.status === "COMPLETED"
-                                ? "bg-green-500 hover:bg-green-600"
-                                : "bg-blue-500 hover:bg-blue-600"
+                                ? "bg-orange-500 hover:bg-orange-600 text-white"
+                                : session.status === "CLOSED"
+                                ? "bg-green-500 hover:bg-green-600 text-white"
+                                : session.status === "OPEN"
+                                ? "bg-blue-500 hover:bg-blue-600 text-white"
+                                : "bg-gray-500 hover:bg-gray-600 text-white"
                             }
                           >
                             {session.status}
@@ -337,6 +384,34 @@ export default function SessionPage() {
                     ))}
                   </TableBody>
                 </Table>
+              </div>
+            )}
+            
+            {/* Pagination */}
+            {sessionResponse && sessionResponse.total_pages > 1 && (
+              <div className="flex items-center justify-between px-4 py-4 border-t">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Page {sessionResponse.current_page} of {sessionResponse.total_pages}
+                  {" "}({sessionResponse.total_records} total records)
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleFilterChange("page", filters.page! - 1)}
+                    disabled={!sessionResponse.prev_page}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleFilterChange("page", filters.page! + 1)}
+                    disabled={!sessionResponse.next_page}
+                  >
+                    Next
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
@@ -410,13 +485,15 @@ export default function SessionPage() {
                       Status
                     </p>
                     <Badge
-                      variant={selectedSession.status === "CONFLICT" ? "default" : "secondary"}
+                      variant="secondary"
                       className={
                         selectedSession.status === "CONFLICT"
-                          ? "bg-orange-500 hover:bg-orange-600"
-                          : selectedSession.status === "COMPLETED"
-                          ? "bg-green-500 hover:bg-green-600"
-                          : "bg-blue-500 hover:bg-blue-600"
+                          ? "bg-orange-500 hover:bg-orange-600 text-white"
+                          : selectedSession.status === "CLOSED"
+                          ? "bg-green-500 hover:bg-green-600 text-white"
+                          : selectedSession.status === "OPEN"
+                          ? "bg-blue-500 hover:bg-blue-600 text-white"
+                          : "bg-gray-500 hover:bg-gray-600 text-white"
                       }
                     >
                       {selectedSession.status}
