@@ -7,6 +7,8 @@ import {
   IsNotEmpty,
   Max,
   Min,
+  MaxLength,
+  IsMongoId,
 } from 'class-validator';
 
 export const SESSION_STATUS = ['OPEN', 'CLOSED', 'CONFLICT', 'ABANDONED'] as const;
@@ -17,6 +19,7 @@ export type SortType = (typeof Sort)[number];
 export class FilterOcrServicesSessionDto {
   @IsNotEmpty()
   @IsString()
+  @IsMongoId()
   subId: string;
 
     // search by reg_num, province, 
@@ -26,17 +29,13 @@ export class FilterOcrServicesSessionDto {
     return typeof value === 'string' ? value.trim() || undefined : value;
   })
   @IsString()
+  @MaxLength(100)
   search?: string; 
 
     
   @IsOptional()
-  // @Transform(({ value }) => {
-  //   if (value === '' || value === null || value === undefined) return 1;
-  //   return parseInt(value, 10);
-  // })
-
   @Transform(({ value, obj, key }) => {
-    const raw = obj?.[key as string]; // ค่าจาก query ดิบๆ ก่อน implicit conversion
+    const raw = obj?.[key as string]; 
     if (raw === '' || raw === null || raw === undefined) return 1;
 
     const v = typeof value === 'string' ? value.trim() : value;
@@ -49,10 +48,7 @@ export class FilterOcrServicesSessionDto {
   page: number =1;
 
   @IsOptional()
-  // @Transform(({ value }) => {
-  //   if (value === '' || value === null || value === undefined) return 10;
-  //   return parseInt(value, 10);
-  // })
+
   @Transform(({ value, obj, key }) => {
     const raw = obj?.[key as string];
     if (raw === '' || raw === null || raw === undefined) return 10;
@@ -86,10 +82,10 @@ export class FilterOcrServicesSessionDto {
 
   @IsOptional()
   @Transform(({ value }) => {
-    if (value === '' || value === null || value === undefined) return 'asc';
+    if (value === '' || value === null || value === undefined) return 'desc';
     return typeof value === 'string' ? value.toLowerCase() : value;
   })
   @IsIn(['asc', 'desc'])
-  order: 'asc' | 'desc' = 'asc';
+  order: 'asc' | 'desc' = 'desc';
 
 }
