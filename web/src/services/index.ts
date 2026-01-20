@@ -4,6 +4,7 @@ import { OrganizationService } from './organization.service';
 import { AuthService } from './auth.service';
 import { ImageService } from './image.service';
 import { RateModelService } from './rate-model.service';
+import { OcrServicesSessionService} from './ocr-services-session.service';
 import { OcrServicesRateModelService } from './ocr-services-img.service';
 import { ENV_CONFIG } from '../config/environment';
 
@@ -62,6 +63,10 @@ class ServiceFactory {
     return this.createService(OcrServicesRateModelService);
   }
 
+  getOcrServicesSessionService(): OcrServicesSessionService{
+    return this.createService(OcrServicesSessionService);
+  }
+
   // Clear all cached services (useful for testing or when switching environments)
   clearServices(): void {
     this.services.clear();
@@ -79,3 +84,4 @@ export const authService = serviceFactory.getAuthService();
 export const imageService = serviceFactory.getImageService();
 export const rateModelService = serviceFactory.getRateModelService();
 export const ocrServicesRateModelService = serviceFactory.getOcrServicesRateModelService();
+export const ocrServicesSessionService = serviceFactory.getOcrServicesSessionService();

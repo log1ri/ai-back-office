@@ -130,16 +130,8 @@ export interface VehicleSession {
   reg_num: string;
   province: string;
   status: string; // CONFLICT, COMPLETED, ONGOING, etc.
-  entry: {
-    time: string;
-    camId: string;
-    logId: string;
-  } | null;
-  exit: {
-    time: string;
-    camId: string;
-    logId: string;
-  } | null;
+  entry: SessionCheckpoint | null;
+  exit: SessionCheckpoint | null;
   durationSec: number | null;
   lastSeenAt: string;
   createdAt: string;
@@ -157,7 +149,7 @@ export interface SessionResponse {
 
 export interface SessionFilters {
   search?: string; // for reg_num search
-  status?: string; // OPEN, CLOSED, CONFLICT, ABANDONED
+  status?: SessionStatus; // OPEN, CLOSED, CONFLICT, ABANDONED
   page?: number;
   limit?: number;
   sortBy?: 'durationSec' | 'lastSeenAt' | 'createdAt' | 'updatedAt';
@@ -169,6 +161,14 @@ export interface SessionStats {
   ongoingSessions: number;
   completedSessions: number;
   averageDuration: number;
+}
+
+export type SessionStatus = 'OPEN' | 'CLOSED' | 'CONFLICT' | 'ABANDONED';
+
+export interface SessionCheckpoint {
+  time: string;   // ISO string
+  camId: string;
+  logId: string;
 }
 
 // Error handling
