@@ -8,6 +8,7 @@ import { LogRealtimeDto } from './dto/realtime-ocr-services-log.dto';
 import { FilterOcrServicesLogDto } from './dto/filter-ocr-services-log.dto';
 import { FilterRealtimeLogsDto} from './dto/filter-realtime-ocr-services-log.dto';
 import { FilterOcrServicesSessionDto } from './dto/filter-ocr-services-session.dto';
+import { FilterOcrServicesSessionTodayDto } from './dto/filter-ocr-services-session-today.dto';
 import { OcrServicesLogsResponseDto } from './dto/ocr-services-logs.dto'
 import { OcrServicesSessionResponseDto } from './dto/ocr-services-sessions.dto';
 import { validateDateRange, shiftMonthSafeUTC, createDateRangeQuery, addDays, normalizeStartOfDayUTC, endOfDayUTC } from '../../utils/date.util';
@@ -265,6 +266,192 @@ export class OcrServicesLogsService {
   
   
   } 
+
+  // total sessions "today"
+  async countSessionsToday(subId:string): Promise<{ date: string; totalSessions: number }> {
+    
+    // Filter by subId if provided
+    if (!subId) {
+      throw new UnprocessableEntityException('subId is required');
+    } 
+
+    // set Date
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    // fetch data
+    const total = await this.ocrServiceSessionModel.countDocuments({
+      subId,
+      createdAt: { $gte: start, $lte: end },
+    });
+
+    return {
+      date: start.toISOString().slice(0, 10),
+      totalSessions: total,
+    };
+  }
+
+  // total currently inside "OPEN" status
+  async countCurrentlyInsideOpen(subId: string): Promise<{ totalSessions: number; status: 'OPEN' }> {
+    if (!subId) {
+      throw new UnprocessableEntityException('subId is required');
+    }
+
+    const total = await this.ocrServiceSessionModel.countDocuments({
+      subId: subId,
+      status: 'OPEN',
+    });
+
+    return { totalSessions: total, status: 'OPEN' };
+  }
+
+  // average durationSec for last 7 days
+  async avgParkingTimeLast(subId: string): Promise<{
+    startDate: string;
+    endDate: string;
+    totalSessions: number;
+    avgSeconds: number;
+  }> {
+    if (!subId) {
+      throw new UnprocessableEntityException('subId is required');
+    }
+
+    const now = new Date();
+    const start = normalizeStartOfDayUTC(addDays(now, -6)); 
+    const end = endOfDayUTC(now);
+
+    const result = await this.ocrServiceSessionModel.aggregate([
+      {
+        $match: {
+          subId,
+          status: 'CLOSED',
+          updatedAt: { $gte: start, $lte: end }, 
+          durationSec: { $type: 'number', $gt: 0 },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalSessions: { $sum: 1 },
+          avgSeconds: { $avg: '$durationSec' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalSessions: 1,
+          avgSeconds: { $ifNull: ['$avgSeconds', 0] },
+        },
+      },
+    ]);
+
+    const row = result?.[0] ?? { totalSessions: 0, avgSeconds: 0 };
+
+    return {
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+      totalSessions: row.totalSessions,
+      avgSeconds: row.avgSeconds,
+
+    };
+  }
+
+  // peak entry hour for last 7 days
+  async peakEntryHour(subId: string,  ): Promise<{
+    startDate: string;
+    endDate: string;
+    peakHour: number | null; // 0-23
+    peakCount: number;
+    byHour: Array<{ hour: number; count: number }>;
+  }> {
+    if (!subId) {
+      throw new UnprocessableEntityException('subId is required');
+    }
+
+    const now = new Date();
+    const start = normalizeStartOfDayUTC(addDays(now, -6)); // ✅ fix 7 วัน (รวมวันนี้)
+    const end = endOfDayUTC(now);
+
+    const rows = await this.ocrServiceSessionModel.aggregate([
+      {
+        $match: {
+          subId,
+          createdAt: { $gte: start, $lte: end }, // เวลาเข้า (entry time)
+        },
+      },
+      {
+        $project: {
+          hour: {
+            $toInt: {
+              $dateToString: { date: '$createdAt', format: '%H', timezone: 'UTC' },
+            },
+          },
+        },
+      },
+      { $group: { _id: '$hour', count: { $sum: 1 } } },
+      { $project: { _id: 0, hour: '$_id', count: 1 } },
+      { $sort: { count: -1, hour: 1 } },
+    ]);
+
+    const peak = rows[0] ?? null;
+
+    return {
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+      peakHour: peak ? peak.hour : null,
+      peakCount: peak ? peak.count : 0,
+      byHour: rows,
+    };
+  }
+
+  async findSessionsToday(filter: FilterOcrServicesSessionTodayDto): Promise<{ data: any[] }> {
+    if (!filter.subId) {
+      throw new UnprocessableEntityException('subId is required');
+    }
+
+    const now = new Date();
+    const start = normalizeStartOfDayUTC(now);
+    const end = endOfDayUTC(now);
+
+    const query: any = {
+      subId: filter.subId,
+      createdAt: { $gte: start, $lte: end },
+    };
+
+    const escapeRegex = (input: string) =>
+      input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    if (filter.search && filter.search.trim() !== '') {
+      const search = escapeRegex(filter.search.trim());
+      query.$or = [
+        { reg_num: { $regex: search, $options: 'i' } },
+        { province: { $regex: search, $options: 'i' } },
+        { status: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const sortField = 'lastSeenAt';
+    const sortOrder = -1;
+
+    const data = await this.ocrServiceSessionModel
+      .find(query)
+      .sort({ [sortField]: sortOrder })
+      .lean();
+
+    return { data };
+  }
+  
+
+
+
+
+
+
+
+
 
 
 }
