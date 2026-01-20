@@ -66,8 +66,6 @@ const ProjectMenuItem: React.FC<{ item: any }> = React.memo(({ item }) => {
           className="flex items-center justify-between w-full cursor-pointer bg-transparent border-none px-2 py-2"
         >
           <div className="flex items-center">
-            {/* icon */}
-            <item.icon className="w-4 h-4  ml-2" />
             <span className="ml-2 ">{item.name}</span>
           </div>
             {item.name === "ApiDocs" && (
@@ -78,7 +76,6 @@ const ProjectMenuItem: React.FC<{ item: any }> = React.memo(({ item }) => {
 
       ) : (
         <Link to={item.url} className='flex items-center'>
-            <item.icon className="w-5 h-5 ml-2"/>
             <span>{item.name}</span>
         </Link>
       )}
@@ -92,9 +89,6 @@ const ProjectMenuItem: React.FC<{ item: any }> = React.memo(({ item }) => {
             <ProjectMenuItem
               item={{
                 ...child,
-                icon: (props: any) => (
-                  <child.icon {...props} className="w-4 h-4 opacity-75 mr-2" />
-                ),
                 name: (
                   <span className="text-[0.95em] font-[350]">{child.name}</span>
                 ),

@@ -207,8 +207,7 @@ export default function DashboardPage() {
       <header className="border-b bg-card px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-3">
-              <Car className="h-7 w-7 text-primary" />
+            <h1 className="text-2xl font-bold">
               Vehicle Monitoring Dashboard
             </h1>
             <p className="text-muted-foreground text-sm mt-1">Campus Parking & Access Control</p>
@@ -241,56 +240,36 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm font-medium">Total Vehicles Today</p>
-                  <p className="text-4xl font-bold mt-2">{kpis.totalToday}</p>
-                </div>
-                <div className="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg">
-                  <Car className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                </div>
+              <div>
+                <p className="text-muted-foreground text-sm font-medium">Total Vehicles Today</p>
+                <p className="text-4xl font-bold mt-2">{kpis.totalToday}</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm font-medium">Currently Inside</p>
-                  <p className="text-4xl font-bold mt-2">{kpis.currentlyInside}</p>
-                </div>
-                <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-lg">
-                  <Clock className="h-8 w-8 text-green-600 dark:text-green-400" />
-                </div>
+              <div>
+                <p className="text-muted-foreground text-sm font-medium">Currently Inside</p>
+                <p className="text-4xl font-bold mt-2">{kpis.currentlyInside}</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm font-medium">Avg Parking Time</p>
-                  <p className="text-4xl font-bold mt-2">{kpis.avgParkingDuration}</p>
-                </div>
-                <div className="bg-purple-100 dark:bg-purple-900/30 p-4 rounded-lg">
-                  <Timer className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-                </div>
+              <div>
+                <p className="text-muted-foreground text-sm font-medium">Avg Parking Time</p>
+                <p className="text-4xl font-bold mt-2">{kpis.avgParkingDuration}</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm font-medium">Peak Entry Hour</p>
-                  <p className="text-4xl font-bold mt-2">{kpis.peakEntryHour}</p>
-                </div>
-                <div className="bg-orange-100 dark:bg-orange-900/30 p-4 rounded-lg">
-                  <TrendingUp className="h-8 w-8 text-orange-600 dark:text-orange-400" />
-                </div>
+              <div>
+                <p className="text-muted-foreground text-sm font-medium">Peak Entry Hour</p>
+                <p className="text-4xl font-bold mt-2">{kpis.peakEntryHour}</p>
               </div>
             </CardContent>
           </Card>
@@ -303,8 +282,7 @@ export default function DashboardPage() {
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <ArrowDownCircle className="h-5 w-5 text-primary" />
+                  <CardTitle>
                     Live Vehicle Activity
                   </CardTitle>
                   <div className="flex items-center gap-2">

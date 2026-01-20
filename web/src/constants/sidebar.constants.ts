@@ -1,5 +1,3 @@
-import { BarChart3, ImageIcon, AlertTriangle, CloudCog, BookOpen, Lightbulb, History, DollarSign  } from "lucide-react";
-
 export const SIDEBAR_CONFIG = {
   DEFAULT_OPEN: true,
   COLLAPSIBLE: 'icon' as const,
@@ -17,18 +15,19 @@ export const PROJECT_NAVIGATION_ITEMS = [
   {
     name: 'Overview',
     url: '/overview',
-    icon: BarChart3,
     current: false,
+  },
+  {
+    name: 'Sessions',
+    url: '/sessions',
   },
   {
     name: 'Image Log',
     url: '/home',
-    icon: ImageIcon,
   },
   {
     name: 'Image Issue',
-    url: '/issues', // Changed from '/about' to '/issues' for clarity
-    icon: AlertTriangle,
+    url: '/issues',
   },
 ] as const;
 

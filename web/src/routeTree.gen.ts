@@ -16,6 +16,7 @@ import { Route as EventTrackingTestRouteImport } from './routes/event-tracking-t
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OcrServicesIndexRouteImport } from './routes/ocr-services/index'
+import { Route as OcrServicesOrgIdSessionsRouteImport } from './routes/ocr-services/$orgId.sessions'
 import { Route as OcrServicesOrgIdOverviewRouteImport } from './routes/ocr-services/$orgId.overview'
 import { Route as OcrServicesOrgIdIssuesRouteImport } from './routes/ocr-services/$orgId.issues'
 import { Route as OcrServicesOrgIdHomeRouteImport } from './routes/ocr-services/$orgId.home'
@@ -55,6 +56,12 @@ const OcrServicesIndexRoute = OcrServicesIndexRouteImport.update({
   path: '/ocr-services/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OcrServicesOrgIdSessionsRoute =
+  OcrServicesOrgIdSessionsRouteImport.update({
+    id: '/ocr-services/$orgId/sessions',
+    path: '/ocr-services/$orgId/sessions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OcrServicesOrgIdOverviewRoute =
   OcrServicesOrgIdOverviewRouteImport.update({
     id: '/ocr-services/$orgId/overview',
@@ -83,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/ocr-services/$orgId/home': typeof OcrServicesOrgIdHomeRoute
   '/ocr-services/$orgId/issues': typeof OcrServicesOrgIdIssuesRoute
   '/ocr-services/$orgId/overview': typeof OcrServicesOrgIdOverviewRoute
+  '/ocr-services/$orgId/sessions': typeof OcrServicesOrgIdSessionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -95,6 +103,7 @@ export interface FileRoutesByTo {
   '/ocr-services/$orgId/home': typeof OcrServicesOrgIdHomeRoute
   '/ocr-services/$orgId/issues': typeof OcrServicesOrgIdIssuesRoute
   '/ocr-services/$orgId/overview': typeof OcrServicesOrgIdOverviewRoute
+  '/ocr-services/$orgId/sessions': typeof OcrServicesOrgIdSessionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,6 +117,7 @@ export interface FileRoutesById {
   '/ocr-services/$orgId/home': typeof OcrServicesOrgIdHomeRoute
   '/ocr-services/$orgId/issues': typeof OcrServicesOrgIdIssuesRoute
   '/ocr-services/$orgId/overview': typeof OcrServicesOrgIdOverviewRoute
+  '/ocr-services/$orgId/sessions': typeof OcrServicesOrgIdSessionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/ocr-services/$orgId/home'
     | '/ocr-services/$orgId/issues'
     | '/ocr-services/$orgId/overview'
+    | '/ocr-services/$orgId/sessions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -134,6 +145,7 @@ export interface FileRouteTypes {
     | '/ocr-services/$orgId/home'
     | '/ocr-services/$orgId/issues'
     | '/ocr-services/$orgId/overview'
+    | '/ocr-services/$orgId/sessions'
   id:
     | '__root__'
     | '/'
@@ -146,6 +158,7 @@ export interface FileRouteTypes {
     | '/ocr-services/$orgId/home'
     | '/ocr-services/$orgId/issues'
     | '/ocr-services/$orgId/overview'
+    | '/ocr-services/$orgId/sessions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -159,6 +172,7 @@ export interface RootRouteChildren {
   OcrServicesOrgIdHomeRoute: typeof OcrServicesOrgIdHomeRoute
   OcrServicesOrgIdIssuesRoute: typeof OcrServicesOrgIdIssuesRoute
   OcrServicesOrgIdOverviewRoute: typeof OcrServicesOrgIdOverviewRoute
+  OcrServicesOrgIdSessionsRoute: typeof OcrServicesOrgIdSessionsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OcrServicesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ocr-services/$orgId/sessions': {
+      id: '/ocr-services/$orgId/sessions'
+      path: '/ocr-services/$orgId/sessions'
+      fullPath: '/ocr-services/$orgId/sessions'
+      preLoaderRoute: typeof OcrServicesOrgIdSessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ocr-services/$orgId/overview': {
       id: '/ocr-services/$orgId/overview'
       path: '/ocr-services/$orgId/overview'
@@ -247,6 +268,7 @@ const rootRouteChildren: RootRouteChildren = {
   OcrServicesOrgIdHomeRoute: OcrServicesOrgIdHomeRoute,
   OcrServicesOrgIdIssuesRoute: OcrServicesOrgIdIssuesRoute,
   OcrServicesOrgIdOverviewRoute: OcrServicesOrgIdOverviewRoute,
+  OcrServicesOrgIdSessionsRoute: OcrServicesOrgIdSessionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
