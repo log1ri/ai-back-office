@@ -39,7 +39,7 @@ export default function SessionPage() {
   const { subId } = useSubIdContext();
   const [filters, setFilters] = useState<SessionFilters>({
     search: "",
-    status: "",
+    status: undefined,
     page: 1,
     limit: 10,
     sortBy: "lastSeenAt",
@@ -70,6 +70,13 @@ export default function SessionPage() {
     const now = new Date();
     const diffSeconds = Math.floor((now.getTime() - start.getTime()) / 1000);
     return formatDuration(diffSeconds);
+  };
+
+  // Unified duration display: only live-calc for OPEN sessions, else rely on backend
+  const getDisplayDuration = (session: VehicleSession): string => {
+    if (session.durationSec !== null) return formatDuration(session.durationSec);
+    if (session.status === "OPEN" && session.entry) return getCurrentDuration(session.entry);
+    return "N/A";
   };
 
   // Get time from entry or exit
@@ -106,7 +113,7 @@ export default function SessionPage() {
   const clearFilters = () => {
     setFilters({
       search: "",
-      status: "",
+      status: undefined,
       page: 1,
       limit: 10,
       sortBy: "lastSeenAt",
@@ -117,8 +124,8 @@ export default function SessionPage() {
   // Calculate stats from session data
   const stats = sessionResponse ? {
     totalSessions: sessionResponse.total_records,
-    ongoingSessions: sessionResponse.data.filter(s => !s.exit).length,
-    completedSessions: sessionResponse.data.filter(s => s.exit).length,
+    ongoingSessions: sessionResponse.data.filter(s => s.status === "OPEN").length,
+    completedSessions: sessionResponse.data.filter(s => s.status === "CLOSED").length,
     averageDuration: sessionResponse.data
       .filter(s => s.durationSec !== null)
       .reduce((sum, s) => sum + (s.durationSec || 0), 0) / 
@@ -126,15 +133,15 @@ export default function SessionPage() {
   } : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold">
               Parking Sessions
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-muted-foreground mt-1">
               Review vehicle entry and exit history
             </p>
           </div>
@@ -143,54 +150,46 @@ export default function SessionPage() {
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
-                <CardContent className="pt-6">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Total
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {stats.totalSessions}
-                    </p>
-                  </div>
+                <CardContent className="pt-6 flex flex-col items-center gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    Total
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.totalSessions}
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="pt-6">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Ongoing
-                    </p>
-                    <p className="text-2xl font-bold text-orange-500">
-                      {stats.ongoingSessions}
-                    </p>
-                  </div>
+                <CardContent className="pt-6 flex flex-col items-center gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    Open
+                  </p>
+                  <p className="text-2xl font-bold text-blue-500">
+                    {stats.ongoingSessions}
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="pt-6">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Completed
-                    </p>
-                    <p className="text-2xl font-bold text-green-500">
-                      {stats.completedSessions}
-                    </p>
-                  </div>
+                <CardContent className="pt-6 flex flex-col items-center gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    Closed
+                  </p>
+                  <p className="text-2xl font-bold text-green-500">
+                    {stats.completedSessions}
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="pt-6">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Average Time
-                    </p>
-                    <p className="text-2xl font-bold text-purple-500">
-                      {formatDuration(stats.averageDuration)}
-                    </p>
-                  </div>
+                <CardContent className="pt-6 flex flex-col items-center gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    Average Time
+                  </p>
+                  <p className="text-2xl font-bold text-purple-500">
+                    {formatDuration(stats.averageDuration)}
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -205,7 +204,7 @@ export default function SessionPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-muted-foreground">
                   License Plate
                 </label>
                 <Input
@@ -218,12 +217,12 @@ export default function SessionPage() {
 
               {/* Status Filter */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-muted-foreground">
                   Status
                 </label>
                 <Select
                   value={filters.status || "all"}
-                  onValueChange={(value: string) => handleFilterChange("status", value === "all" ? "" : value)}
+                  onValueChange={(value: string) => handleFilterChange("status", value === "all" ? undefined : value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -240,7 +239,7 @@ export default function SessionPage() {
 
               {/* Sort By */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-muted-foreground">
                   Sort By
                 </label>
                 <Select
@@ -261,7 +260,7 @@ export default function SessionPage() {
 
               {/* Order */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-muted-foreground">
                   Order
                 </label>
                 <Select
@@ -301,7 +300,7 @@ export default function SessionPage() {
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-gray-600 dark:text-gray-400">Loading data...</p>
+                  <p className="text-muted-foreground">Loading data...</p>
                 </div>
               </div>
             ) : error ? (
@@ -309,20 +308,20 @@ export default function SessionPage() {
                 Error loading data
               </div>
             ) : !sessionResponse || sessionResponse.data.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-12 text-muted-foreground">
                 No data found
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="bg-muted/50">
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>License Plate</TableHead>
-                      <TableHead>Province</TableHead>
-                      <TableHead>Time In</TableHead>
-                      <TableHead>Time Out</TableHead>
-                      <TableHead>Duration</TableHead>
+                      <TableHead className="text-center">Province</TableHead>
+                      <TableHead className="text-center">Time In</TableHead>
+                      <TableHead className="text-center">Time Out</TableHead>
+                      <TableHead className="text-center">Duration</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -340,18 +339,14 @@ export default function SessionPage() {
                         <TableCell className="font-semibold">
                           {session.reg_num}
                         </TableCell>
-                        <TableCell>{session.province}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">{session.province || "-"}</TableCell>
+                        <TableCell className="text-center">
                           {session.entry ? format(new Date(session.entry.time), "HH:mm:ss") : "-"}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           {session.exit ? format(new Date(session.exit.time), "HH:mm:ss") : "-"}
                         </TableCell>
-                        <TableCell>
-                          {session.durationSec !== null 
-                            ? formatDuration(session.durationSec)
-                            : (session.entry ? getCurrentDuration(session.entry) : "N/A")}
-                        </TableCell>
+                        <TableCell className="text-center">{getDisplayDuration(session)}</TableCell>
                         <TableCell>
                           <Badge
                             variant="secondary"
@@ -390,7 +385,7 @@ export default function SessionPage() {
             {/* Pagination */}
             {sessionResponse && sessionResponse.total_pages > 1 && (
               <div className="flex items-center justify-between px-4 py-4 border-t">
-                <div className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="text-sm text-muted-foreground">
                   Page {sessionResponse.current_page} of {sessionResponse.total_pages}
                   {" "}({sessionResponse.total_records} total records)
                 </div>
@@ -434,7 +429,7 @@ export default function SessionPage() {
                 {/* Session Info */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       License Plate
                     </p>
                     <p className="text-lg font-semibold">
@@ -443,16 +438,16 @@ export default function SessionPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       Province
                     </p>
                     <p className="text-lg font-semibold">
-                      {selectedSession.province}
+                      {selectedSession.province || "-"}
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       Time In
                     </p>
                     <p className="text-lg">
@@ -461,7 +456,7 @@ export default function SessionPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       Time Out
                     </p>
                     <p className="text-lg">
@@ -470,18 +465,16 @@ export default function SessionPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       Parking Duration
                     </p>
                     <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                      {selectedSession.durationSec !== null
-                        ? formatDuration(selectedSession.durationSec)
-                        : (selectedSession.entry ? getCurrentDuration(selectedSession.entry) : "N/A")}
+                      {getDisplayDuration(selectedSession)}
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       Status
                     </p>
                     <Badge
@@ -502,7 +495,7 @@ export default function SessionPage() {
 
                   {selectedSession.entry && (
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-muted-foreground">
                         Entry Camera
                       </p>
                       <p className="text-lg">{selectedSession.entry.camId}</p>
@@ -511,7 +504,7 @@ export default function SessionPage() {
 
                   {selectedSession.exit && (
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-muted-foreground">
                         Exit Camera
                       </p>
                       <p className="text-lg">{selectedSession.exit.camId}</p>

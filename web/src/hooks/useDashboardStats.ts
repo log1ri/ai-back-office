@@ -1,101 +1,48 @@
 import { useQuery } from '@tanstack/react-query';
+import { dashboardService } from '../services/ocr-service-dashboard.services';
+import type { TodaySession, SessionTodayResponse } from '../services/ocr-service-dashboard.services';
 
-const BASE_URL = 'http://localhost:5167/api/v1/ocr-services-logs';
-
-interface CurrentlyInsideResponse {
-  total: number;
-}
-
-interface SessionCountResponse {
-  total: number;
-}
-
-interface PeakHourResponse {
-  peakHour: number;
-  count: number;
-}
-
-interface AvgParkingTimeResponse {
-  avgDurationSec: number;
-}
-
-interface TodaySession {
-  id: string;
-  organization: string;
-  subId: string;
-  reg_num: string;
-  province: string;
-  status: string;
-  entry: {
-    time: string;
-    camId: string;
-    logId: string;
-  } | null;
-  exit: {
-    time: string;
-    camId: string;
-    logId: string;
-  } | null;
-  durationSec: number | null;
-  lastSeenAt: string;
-}
-
-interface SessionTodayResponse {
-  data: TodaySession[];
-  total_records: number;
-}
+export { type TodaySession, type SessionTodayResponse };
 
 export const useDashboardStats = (subId: string) => {
   // Currently Inside Total
   const { data: currentlyInsideData } = useQuery({
     queryKey: ['dashboard', 'currently-inside', subId],
-    queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/session/currently-inside/total?subId=${subId}`);
-      if (!response.ok) throw new Error('Failed to fetch currently inside');
-      return response.json() as Promise<CurrentlyInsideResponse>;
-    },
+    queryFn: () => dashboardService.getCurrentlyInsideTotal(subId),
     enabled: !!subId,
     staleTime: 30000, // 30 seconds
     refetchInterval: 60000, // 1 minute
+    retry: 1,
   });
 
   // Session Count Today
   const { data: sessionCountData } = useQuery({
     queryKey: ['dashboard', 'session-count-today', subId],
-    queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/session/today/total?subId=${subId}`);
-      if (!response.ok) throw new Error('Failed to fetch session count');
-      return response.json() as Promise<SessionCountResponse>;
-    },
+    queryFn: () => dashboardService.getSessionCountToday(subId),
     enabled: !!subId,
     staleTime: 30000,
     refetchInterval: 60000,
+    retry: 1,
   });
 
   // Peak Entry Hour (7 days)
   const { data: peakHourData } = useQuery({
     queryKey: ['dashboard', 'peak-hour', subId],
-    queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/session/entry/peak-hour?subId=${subId}`);
-      if (!response.ok) throw new Error('Failed to fetch peak hour');
-      return response.json() as Promise<PeakHourResponse>;
-    },
+    queryFn: () => dashboardService.getPeakHourEntry(subId),
     enabled: !!subId,
     staleTime: 300000, // 5 minutes
     refetchInterval: 300000,
+    retry: 1,
   });
 
   // Average Parking Time (7 days)
   const { data: avgParkingTimeData } = useQuery({
     queryKey: ['dashboard', 'avg-parking-time', subId],
-    queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/session/parking-time/avg?subId=${subId}`);
-      if (!response.ok) throw new Error('Failed to fetch avg parking time');
-      return response.json() as Promise<AvgParkingTimeResponse>;
-    },
+    queryFn: () => dashboardService.getAvgParkingTime(subId),
     enabled: !!subId,
     staleTime: 300000,
     refetchInterval: 300000,
+    retry: 1,
   });
 
   return {
@@ -110,17 +57,10 @@ export const useDashboardStats = (subId: string) => {
 export const useTodaySessions = (subId: string, search: string = '') => {
   return useQuery({
     queryKey: ['dashboard', 'sessions-today', subId, search],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      params.append('subId', subId);
-      if (search) params.append('search', search);
-      
-      const response = await fetch(`${BASE_URL}/session/today?${params.toString()}`);
-      if (!response.ok) throw new Error('Failed to fetch today sessions');
-      return response.json() as Promise<SessionTodayResponse>;
-    },
+    queryFn: () => dashboardService.getTodaySessions(subId, search),
     enabled: !!subId,
     staleTime: 30000,
     refetchInterval: 60000,
+    retry: 1,
   });
 };
