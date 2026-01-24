@@ -3,20 +3,26 @@ import { ENV_CONFIG } from '../config/environment';
 
 // ===== INTERFACES =====
 export interface CurrentlyInsideResponse {
-  total: number;
+  totalSessions: number;
+  status?: string;
 }
 
 export interface SessionCountResponse {
-  total: number;
+  totalSessions: number;
 }
 
 export interface PeakHourResponse {
-  peakHour: number;
-  count: number;
+  byHour: Array<{
+    hour: number;
+    count: number;
+  }>;
 }
 
 export interface AvgParkingTimeResponse {
-  avgDurationSec: number;
+  startDate: string;
+  endDate: string;
+  totalSessions: number;
+  avgSeconds: number;
 }
 
 export interface TodaySession {
@@ -146,12 +152,17 @@ export class OcrServicesDashboardService extends BaseHttpClient {
       this.getAvgParkingTime(subId),
     ]);
 
+    // Find peak hour from byHour array
+    const peakHourInfo = peakHour.byHour?.reduce((max, current) => 
+      (current.count > (max?.count ?? 0)) ? current : max
+    , peakHour.byHour[0]);
+
     return {
-      currentlyInside: currentlyInside.total,
-      sessionCountToday: sessionCountToday.total,
-      peakHour: peakHour.peakHour,
-      peakHourCount: peakHour.count,
-      avgParkingTimeSec: avgParkingTime.avgDurationSec,
+      currentlyInside: currentlyInside.totalSessions,
+      sessionCountToday: sessionCountToday.totalSessions,
+      peakHour: peakHourInfo?.hour ?? null,
+      peakHourCount: peakHourInfo?.count ?? 0,
+      avgParkingTimeSec: avgParkingTime.avgSeconds,
     };
   }
 }

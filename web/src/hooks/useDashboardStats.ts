@@ -57,12 +57,17 @@ export const useDashboardStats = (subId: string) => {
     retry: 1,
   });
 
+  // Calculate peak hour from byHour array
+  const peakHourInfo = peakHourData?.byHour?.reduce((max, current) => 
+    (current.count > (max?.count ?? 0)) ? current : max
+  , peakHourData.byHour[0]);
+
   return {
-    currentlyInside: currentlyInsideData?.total ?? 0,
-    sessionCountToday: sessionCountData?.total ?? 0,
-    peakHour: peakHourData?.peakHour ?? null,
-    peakHourCount: peakHourData?.count ?? 0,
-    avgParkingTimeSec: avgParkingTimeData?.avgDurationSec ?? 0,
+    currentlyInside: currentlyInsideData?.totalSessions ?? 0,
+    sessionCountToday: sessionCountData?.totalSessions ?? 0,
+    peakHour: peakHourInfo?.hour ?? null,
+    peakHourCount: peakHourInfo?.count ?? 0,
+    avgParkingTimeSec: avgParkingTimeData?.avgSeconds ?? 0,
   };
 };
 

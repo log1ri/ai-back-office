@@ -62,7 +62,10 @@ export default function DashboardPage() {
 
   // Chart data - hourly entries for today
   const chartData = useMemo(() => {
-    if (!sessionsData?.data) return [];
+    if (!sessionsData?.data || sessionsData.data.length === 0) {
+      console.log('[DashboardPage] No session data available for chart');
+      return [];
+    }
 
     const hourlyData = new Map<number, { hour: string; entries: number }>();
 
@@ -105,7 +108,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-6">
-              <div>
+              <div className="text-center">
                 <p className="text-muted-foreground text-sm font-medium">Total Vehicles Today</p>
                 <p className="text-4xl font-bold mt-2">{sessionCountToday}</p>
               </div>
@@ -114,7 +117,7 @@ export default function DashboardPage() {
 
           <Card>
             <CardContent className="p-6">
-              <div>
+              <div className="text-center">
                 <p className="text-muted-foreground text-sm font-medium">Currently Inside</p>
                 <p className="text-4xl font-bold mt-2">{currentlyInside}</p>
               </div>
@@ -123,7 +126,7 @@ export default function DashboardPage() {
 
           <Card>
             <CardContent className="p-6">
-              <div>
+              <div className="text-center">
                 <p className="text-muted-foreground text-sm font-medium">Avg Parking Time (7d)</p>
                 <p className="text-4xl font-bold mt-2">{formatDuration(avgParkingTimeSec)}</p>
               </div>
@@ -132,7 +135,7 @@ export default function DashboardPage() {
 
           <Card>
             <CardContent className="p-6">
-              <div>
+              <div className="text-center">
                 <p className="text-muted-foreground text-sm font-medium">Peak Entry Hour (7d)</p>
                 <p className="text-4xl font-bold mt-2">
                   {peakHour !== null ? `${peakHour.toString().padStart(2, '0')}:00` : 'N/A'}
@@ -259,29 +262,38 @@ export default function DashboardPage() {
                 <p className="text-muted-foreground text-sm">Hourly vehicle entries</p>
               </CardHeader>
               <CardContent className="p-4">
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis 
-                      dataKey="hour" 
-                      className="text-muted-foreground"
-                      tick={{ fontSize: 10 }}
-                      angle={-45}
-                      textAnchor="end"
-                      height={80}
-                    />
-                    <YAxis className="text-muted-foreground" tick={{ fontSize: 12 }} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                      }} 
-                      labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    />
-                    <Bar dataKey="entries" fill="hsl(var(--primary))" name="Entries" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                {chartData.length === 0 ? (
+                  <div className="flex items-center justify-center h-[400px] text-muted-foreground">
+                    <div className="text-center space-y-2">
+                      <p className="text-sm">No vehicle entries today</p>
+                      <p className="text-xs">Chart will update when vehicles enter</p>
+                    </div>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis 
+                        dataKey="hour" 
+                        className="text-muted-foreground"
+                        tick={{ fontSize: 10 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                      />
+                      <YAxis className="text-muted-foreground" tick={{ fontSize: 12 }} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))', 
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                        }} 
+                        labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      />
+                      <Bar dataKey="entries" fill="hsl(var(--primary))" name="Entries" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </CardContent>
             </Card>
           </div>
