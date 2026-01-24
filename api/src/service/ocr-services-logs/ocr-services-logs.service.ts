@@ -11,7 +11,7 @@ import { FilterOcrServicesSessionDto } from './dto/filter-ocr-services-session.d
 import { FilterOcrServicesSessionTodayDto } from './dto/filter-ocr-services-session-today.dto';
 import { OcrServicesLogsResponseDto } from './dto/ocr-services-logs.dto'
 import { OcrServicesSessionResponseDto } from './dto/ocr-services-sessions.dto';
-import { validateDateRange, shiftMonthSafeUTC, createDateRangeQuery, addDays, normalizeStartOfDayUTC, endOfDayUTC } from '../../utils/date.util';
+import { validateDateRange, shiftMonthSafeUTC, createDateRangeQuery, addDays, normalizeStartOfDayUTC, endOfDayUTC, getTodayRangeUTC7, getLastNDaysRangeUTC7} from '../../utils/date.util';
 @Injectable()
 export class OcrServicesLogsService {
   constructor(
@@ -275,12 +275,7 @@ export class OcrServicesLogsService {
       throw new UnprocessableEntityException('subId is required');
     } 
 
-    // set Date
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
+    const { startUtc: start, endUtc: end } = getTodayRangeUTC7();
 
     // fetch data
     const total = await this.ocrServiceSessionModel.countDocuments({
@@ -289,7 +284,7 @@ export class OcrServicesLogsService {
     });
 
     return {
-      date: start.toISOString().slice(0, 10),
+      date: new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10),
       totalSessions: total,
     };
   }
@@ -319,9 +314,7 @@ export class OcrServicesLogsService {
       throw new UnprocessableEntityException('subId is required');
     }
 
-    const now = new Date();
-    const start = normalizeStartOfDayUTC(addDays(now, -6)); 
-    const end = endOfDayUTC(now);
+    const { startUtc: start, endUtc: end } = getLastNDaysRangeUTC7(7);
 
     const result = await this.ocrServiceSessionModel.aggregate([
       {
@@ -351,8 +344,8 @@ export class OcrServicesLogsService {
     const row = result?.[0] ?? { totalSessions: 0, avgSeconds: 0 };
 
     return {
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
+      startDate: start.toLocaleString("sv-SE", { timeZone: "Asia/Bangkok" }),
+      endDate: end.toLocaleString("sv-SE", { timeZone: "Asia/Bangkok" }),
       totalSessions: row.totalSessions,
       avgSeconds: row.avgSeconds,
 
@@ -371,9 +364,8 @@ export class OcrServicesLogsService {
       throw new UnprocessableEntityException('subId is required');
     }
 
-    const now = new Date();
-    const start = normalizeStartOfDayUTC(addDays(now, -6)); // ✅ fix 7 วัน (รวมวันนี้)
-    const end = endOfDayUTC(now);
+    const { startUtc: start, endUtc: end } = getLastNDaysRangeUTC7(7);
+
 
     const rows = await this.ocrServiceSessionModel.aggregate([
       {
@@ -386,7 +378,7 @@ export class OcrServicesLogsService {
         $project: {
           hour: {
             $toInt: {
-              $dateToString: { date: '$createdAt', format: '%H', timezone: 'UTC' },
+              $dateToString: { date: '$createdAt', format: '%H', timezone: 'Asia/Bangkok' },
             },
           },
         },
@@ -399,8 +391,8 @@ export class OcrServicesLogsService {
     const peak = rows[0] ?? null;
 
     return {
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
+      startDate: start.toLocaleString("sv-SE", { timeZone: "Asia/Bangkok" }),
+      endDate: end.toLocaleString("sv-SE", { timeZone: "Asia/Bangkok" }),
       peakHour: peak ? peak.hour : null,
       peakCount: peak ? peak.count : 0,
       byHour: rows,
@@ -412,9 +404,8 @@ export class OcrServicesLogsService {
       throw new UnprocessableEntityException('subId is required');
     }
 
-    const now = new Date();
-    const start = normalizeStartOfDayUTC(now);
-    const end = endOfDayUTC(now);
+    const { startUtc: start, endUtc: end } = getTodayRangeUTC7();
+    console.log('Today UTC+7 Range:', start, end);
 
     const query: any = {
       subId: filter.subId,
