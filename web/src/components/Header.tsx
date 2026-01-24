@@ -46,12 +46,10 @@ function Header({ onToggleTheme, theme }: HeaderProps) {
       <div className="flex items-center gap-2 px-4 justify-between w-full">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <div className="h-7 flex items-center translate-y-[6px]">
+            <Breadcrumb>
+              <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink href="/">
                   AI Back Office
@@ -74,8 +72,9 @@ function Header({ onToggleTheme, theme }: HeaderProps) {
                   </BreadcrumbItem>
                 </>
               )}
-            </BreadcrumbList>
-          </Breadcrumb>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
         </div>
         {/* Dark mode toggle button */}
         {onToggleTheme && (

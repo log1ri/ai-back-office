@@ -22,12 +22,14 @@ import {
 } from "../../components/ui/table";
 import { useSubIdContext } from "../../contexts/SubIdContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useDashboardStats, useTodaySessions } from "../../hooks/useDashboardStats";
+import { useDashboardStats, useTodaySessions, type TodaySession } from "../../hooks/useDashboardStats";
 import { format } from "date-fns";
 
 export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const { subId } = useSubIdContext();
+
+  console.log('[DashboardPage] Rendered with subId:', subId);
 
   // Fetch dashboard statistics
   const {
@@ -72,7 +74,7 @@ export default function DashboardPage() {
       });
     }
 
-    sessionsData.data.forEach((session) => {
+    sessionsData.data.forEach((session: TodaySession) => {
       if (session.entry?.time) {
         const hour = new Date(session.entry.time).getHours();
         const data = hourlyData.get(hour)!;
@@ -203,7 +205,7 @@ export default function DashboardPage() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        sessionsData.data.map((session) => (
+                        sessionsData.data.map((session: TodaySession) => (
                           <TableRow key={session.id}>
                             <TableCell className="text-sm">
                               {session.entry?.time 

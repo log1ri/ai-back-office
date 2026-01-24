@@ -107,7 +107,12 @@ export default function SessionPage() {
   };
 
   const handleFilterChange = (key: keyof SessionFilters, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
+    setFilters(prev => ({
+      ...prev,
+      [key]: value,
+      // Only reset to page 1 if we're not changing the page itself
+      page: key === 'page' ? value : 1
+    }));
   };
 
   const clearFilters = () => {
@@ -198,91 +203,87 @@ export default function SessionPage() {
 
         {/* Filter Panel */}
         <Card>
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  License Plate
-                </label>
+          <CardContent className="py-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Search Input */}
+              <div className="flex-1 min-w-[200px] max-w-md">
                 <Input
                   type="text"
                   placeholder="Search license plate..."
                   value={filters.search}
                   onChange={(e) => handleFilterChange("search", e.target.value)}
+                  className="h-9"
                 />
               </div>
 
               {/* Status Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Status
-                </label>
-                <Select
-                  value={filters.status || "all"}
-                  onValueChange={(value: string) => handleFilterChange("status", value === "all" ? undefined : value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="OPEN">Open</SelectItem>
-                    <SelectItem value="CLOSED">Closed</SelectItem>
-                    <SelectItem value="CONFLICT">Conflict</SelectItem>
-                    <SelectItem value="ABANDONED">Abandoned</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select
+                value={filters.status || "all"}
+                onValueChange={(value: string) => handleFilterChange("status", value === "all" ? undefined : value)}
+              >
+                <SelectTrigger className="w-[130px] h-9">
+                  <SelectValue placeholder="Status: All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="OPEN">Open</SelectItem>
+                  <SelectItem value="CLOSED">Closed</SelectItem>
+                  <SelectItem value="CONFLICT">Conflict</SelectItem>
+                  <SelectItem value="ABANDONED">Abandoned</SelectItem>
+                </SelectContent>
+              </Select>
 
               {/* Sort By */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Sort By
-                </label>
-                <Select
-                  value={filters.sortBy || "lastSeenAt"}
-                  onValueChange={(value: any) => handleFilterChange("sortBy", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="lastSeenAt">Last Seen</SelectItem>
-                    <SelectItem value="durationSec">Duration</SelectItem>
-                    <SelectItem value="createdAt">Created Date</SelectItem>
-                    <SelectItem value="updatedAt">Updated Date</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select
+                value={filters.sortBy || "lastSeenAt"}
+                onValueChange={(value: any) => handleFilterChange("sortBy", value)}
+              >
+                <SelectTrigger className="w-[130px] h-9">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lastSeenAt">Last Seen</SelectItem>
+                  <SelectItem value="durationSec">Duration</SelectItem>
+                  <SelectItem value="createdAt">Created</SelectItem>
+                  <SelectItem value="updatedAt">Updated</SelectItem>
+                </SelectContent>
+              </Select>
 
               {/* Order */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Order
-                </label>
-                <Select
-                  value={filters.order || "desc"}
-                  onValueChange={(value: any) => handleFilterChange("order", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Order" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="desc">Descending</SelectItem>
-                    <SelectItem value="asc">Ascending</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+              <Select
+                value={filters.order || "desc"}
+                onValueChange={(value: any) => handleFilterChange("order", value)}
+              >
+                <SelectTrigger className="w-[130px] h-9">
+                  <SelectValue placeholder="Order" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Descending</SelectItem>
+                  <SelectItem value="asc">Ascending</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <div className="mt-4 flex justify-end">
+              {/* Items per page */}
+              <Select
+                value={filters.limit?.toString() || "10"}
+                onValueChange={(value: string) => handleFilterChange("limit", parseInt(value))}
+              >
+                <SelectTrigger className="w-[110px] h-9">
+                  <SelectValue placeholder="10/page" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10/page</SelectItem>
+                  <SelectItem value="25">25/page</SelectItem>
+                  <SelectItem value="50">50/page</SelectItem>
+                  <SelectItem value="100">100/page</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Clear Filters */}
               <Button
                 variant="outline"
                 onClick={clearFilters}
-                className="flex items-center gap-2"
+                className="h-9"
               >
                 Clear Filters
               </Button>
@@ -383,29 +384,39 @@ export default function SessionPage() {
             )}
             
             {/* Pagination */}
-            {sessionResponse && sessionResponse.total_pages > 1 && (
+            {sessionResponse && sessionResponse.total_records > 0 && (
               <div className="flex items-center justify-between px-4 py-4 border-t">
                 <div className="text-sm text-muted-foreground">
-                  Page {sessionResponse.current_page} of {sessionResponse.total_pages}
-                  {" "}({sessionResponse.total_records} total records)
+                  Showing {((sessionResponse.current_page - 1) * (filters.limit || 10)) + 1} to {Math.min(sessionResponse.current_page * (filters.limit || 10), sessionResponse.total_records)} of {sessionResponse.total_records} records
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleFilterChange("page", filters.page! - 1)}
-                    disabled={!sessionResponse.prev_page}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleFilterChange("page", filters.page! + 1)}
-                    disabled={!sessionResponse.next_page}
-                  >
-                    Next
-                  </Button>
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    Page {sessionResponse.current_page} of {sessionResponse.total_pages}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newPage = Math.max(1, (filters.page || 1) - 1);
+                        handleFilterChange("page", newPage);
+                      }}
+                      disabled={sessionResponse.current_page <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newPage = Math.min(sessionResponse.total_pages, (filters.page || 1) + 1);
+                        handleFilterChange("page", newPage);
+                      }}
+                      disabled={sessionResponse.current_page >= sessionResponse.total_pages}
+                    >
+                      Next
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

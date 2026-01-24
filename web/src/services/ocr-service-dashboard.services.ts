@@ -67,6 +67,12 @@ export class OcrServicesDashboardService extends BaseHttpClient {
    */
   async getCurrentlyInsideTotal(subId: string): Promise<CurrentlyInsideResponse> {
     const endpoint = `${this.basePath}/session/currently-inside/total?subId=${subId}`;
+    console.log('[Dashboard Service] getCurrentlyInsideTotal:', {
+      endpoint,
+      fullUrl: `${ENV_CONFIG.API_BASE_URL}${endpoint}`,
+      subId,
+      token: localStorage.getItem('authToken') ? 'Present' : 'Missing'
+    });
     return this.get<CurrentlyInsideResponse>(endpoint);
   }
 
@@ -77,6 +83,11 @@ export class OcrServicesDashboardService extends BaseHttpClient {
    */
   async getSessionCountToday(subId: string): Promise<SessionCountResponse> {
     const endpoint = `${this.basePath}/session/today/total?subId=${subId}`;
+    console.log('[Dashboard Service] getSessionCountToday:', {
+      endpoint,
+      fullUrl: `${ENV_CONFIG.API_BASE_URL}${endpoint}`,
+      subId
+    });
     return this.get<SessionCountResponse>(endpoint);
   }
 
@@ -113,6 +124,12 @@ export class OcrServicesDashboardService extends BaseHttpClient {
     }
     
     const endpoint = `${this.basePath}/session/today?${params.toString()}`;
+    console.log('[Dashboard Service] getTodaySessions:', {
+      endpoint,
+      fullUrl: `${ENV_CONFIG.API_BASE_URL}${endpoint}`,
+      subId,
+      search
+    });
     return this.get<SessionTodayResponse>(endpoint);
   }
 

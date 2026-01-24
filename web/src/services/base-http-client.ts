@@ -177,6 +177,12 @@ export class BaseHttpClient {
     const authToken = localStorage.getItem('authToken');
     const refreshToken = localStorage.getItem('refreshToken');
     
+    console.log('[BaseHttpClient] Request:', {
+      url,
+      authToken: authToken ? `${authToken.substring(0, 20)}...` : 'Missing',
+      refreshToken: refreshToken ? 'Present' : 'Missing'
+    });
+    
     // ตรวจสอบและ refresh token ถ้าจำเป็น
     let token = authToken;
     
