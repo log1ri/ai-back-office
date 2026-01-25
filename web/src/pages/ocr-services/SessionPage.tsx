@@ -31,6 +31,7 @@ import {
 } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
 import { useSessions, useCountClosedSession } from "../../hooks/useSessions";
+import { useDashboardStats} from "../../hooks/useDashboardStats";
 import type { VehicleSession, SessionFilters, } from "../../types/api.types";
 import { format } from "date-fns";
 import { useSubIdContext } from "../../contexts/SubIdContext";
@@ -50,7 +51,8 @@ export default function SessionPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   
   const { data: sessionResponse, isLoading, error } = useSessions(filters, subId);
-  const { data: closedSessionData } = useCountClosedSession(subId);
+  const { data: closedSessionData} = useCountClosedSession(subId);
+  const {currentlyInside} = useDashboardStats(subId || "");
   
   // Format duration from seconds to human readable format
   const formatDuration = (seconds: number | null): string => {
@@ -130,8 +132,6 @@ export default function SessionPage() {
   // Calculate stats from session data
   const stats = sessionResponse ? {
     totalSessions: sessionResponse.total_records,
-    ongoingSessions: sessionResponse.data.filter(s => s.status === "OPEN").length,
-    completedSessions: sessionResponse.data.filter(s => s.status === "CLOSED").length,
     averageDuration: sessionResponse.data
       .filter(s => s.durationSec !== null)
       .reduce((sum, s) => sum + (s.durationSec || 0), 0) / 
@@ -172,7 +172,7 @@ export default function SessionPage() {
                     Open
                   </p>
                   <p className="text-2xl font-bold text-blue-500">
-                    {stats.ongoingSessions}
+                    {currentlyInside ? currentlyInside : 0}
                   </p>
                 </CardContent>
               </Card>
