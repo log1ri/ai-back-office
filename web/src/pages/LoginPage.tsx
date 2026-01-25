@@ -235,7 +235,7 @@ const LoginPage: React.FC = () => {
               )}
               <button
                 type="submit"
-                className="w-full p-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-500 text-white font-bold uppercase shadow-lg hover:-translate-y-1 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="w-full p-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-500 !text-gray-100 font-bold uppercase shadow-lg hover:-translate-y-1 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                 disabled={isLoading || registerForm.formState.isSubmitting}
               >
                 {isLoading || registerForm.formState.isSubmitting
@@ -338,7 +338,7 @@ const LoginPage: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full p-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-500 text-white font-bold uppercase shadow-lg hover:-translate-y-1 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="w-full p-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-500 !text-gray-100 font-bold uppercase shadow-lg hover:-translate-y-1 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                   disabled={loginForm.formState.isSubmitting}
                 >
                   {isLoading || loginForm.formState.isSubmitting

@@ -6,6 +6,7 @@ import { ImageService } from './image.service';
 import { RateModelService } from './rate-model.service';
 import { OcrServicesSessionService} from './ocr-services-session.service';
 import { OcrServicesRateModelService } from './ocr-services-img.service';
+import { OcrServicesDashboardService } from './ocr-service-dashboard.services';
 import { ENV_CONFIG } from '../config/environment';
 
 // Factory pattern + Dependency Inversion Principle
@@ -67,6 +68,10 @@ class ServiceFactory {
     return this.createService(OcrServicesSessionService);
   }
 
+  getOcrServicesDashboardService(): OcrServicesDashboardService {
+    return this.createService(OcrServicesDashboardService);
+  }
+
   // Clear all cached services (useful for testing or when switching environments)
   clearServices(): void {
     this.services.clear();
@@ -85,3 +90,4 @@ export const imageService = serviceFactory.getImageService();
 export const rateModelService = serviceFactory.getRateModelService();
 export const ocrServicesRateModelService = serviceFactory.getOcrServicesRateModelService();
 export const ocrServicesSessionService = serviceFactory.getOcrServicesSessionService();
+export const ocrServicesDashboardService = serviceFactory.getOcrServicesDashboardService();

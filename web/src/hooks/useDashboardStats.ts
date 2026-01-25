@@ -1,126 +1,87 @@
 import { useQuery } from '@tanstack/react-query';
+import { dashboardService } from '../services/ocr-service-dashboard.services';
+import type { 
+  TodaySession, 
+  SessionTodayResponse, 
+  CurrentlyInsideResponse,
+  SessionCountResponse,
+  PeakHourResponse,
+  AvgParkingTimeResponse
+} from '../services/ocr-service-dashboard.services';
 
-const BASE_URL = 'http://localhost:5167/api/v1/ocr-services-logs';
-
-interface CurrentlyInsideResponse {
-  total: number;
-}
-
-interface SessionCountResponse {
-  total: number;
-}
-
-interface PeakHourResponse {
-  peakHour: number;
-  count: number;
-}
-
-interface AvgParkingTimeResponse {
-  avgDurationSec: number;
-}
-
-interface TodaySession {
-  id: string;
-  organization: string;
-  subId: string;
-  reg_num: string;
-  province: string;
-  status: string;
-  entry: {
-    time: string;
-    camId: string;
-    logId: string;
-  } | null;
-  exit: {
-    time: string;
-    camId: string;
-    logId: string;
-  } | null;
-  durationSec: number | null;
-  lastSeenAt: string;
-}
-
-interface SessionTodayResponse {
-  data: TodaySession[];
-  total_records: number;
-}
+export { type TodaySession, type SessionTodayResponse };
 
 export const useDashboardStats = (subId: string) => {
+  // Check if subId is valid (not 'default' and not empty)
+  const isValidSubId = Boolean(subId && subId !== 'default' && subId.length > 0);
+  
+  console.log('[useDashboardStats] Hook called with subId:', { subId, isValidSubId });
+
   // Currently Inside Total
-  const { data: currentlyInsideData } = useQuery({
+  const { data: currentlyInsideData } = useQuery<CurrentlyInsideResponse>({
     queryKey: ['dashboard', 'currently-inside', subId],
-    queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/session/currently-inside/total?subId=${subId}`);
-      if (!response.ok) throw new Error('Failed to fetch currently inside');
-      return response.json() as Promise<CurrentlyInsideResponse>;
-    },
-    enabled: !!subId,
+    queryFn: () => dashboardService.getCurrentlyInsideTotal(subId),
+    enabled: isValidSubId,
     staleTime: 30000, // 30 seconds
     refetchInterval: 60000, // 1 minute
+    retry: 1,
   });
 
   // Session Count Today
-  const { data: sessionCountData } = useQuery({
+  const { data: sessionCountData } = useQuery<SessionCountResponse>({
     queryKey: ['dashboard', 'session-count-today', subId],
-    queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/session/today/total?subId=${subId}`);
-      if (!response.ok) throw new Error('Failed to fetch session count');
-      return response.json() as Promise<SessionCountResponse>;
-    },
-    enabled: !!subId,
+    queryFn: () => dashboardService.getSessionCountToday(subId),
+    enabled: isValidSubId,
     staleTime: 30000,
     refetchInterval: 60000,
+    retry: 1,
   });
 
   // Peak Entry Hour (7 days)
-  const { data: peakHourData } = useQuery({
+  const { data: peakHourData } = useQuery<PeakHourResponse>({
     queryKey: ['dashboard', 'peak-hour', subId],
-    queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/session/entry/peak-hour?subId=${subId}`);
-      if (!response.ok) throw new Error('Failed to fetch peak hour');
-      return response.json() as Promise<PeakHourResponse>;
-    },
-    enabled: !!subId,
+    queryFn: () => dashboardService.getPeakHourEntry(subId),
+    enabled: isValidSubId,
     staleTime: 300000, // 5 minutes
     refetchInterval: 300000,
+    retry: 1,
   });
 
   // Average Parking Time (7 days)
-  const { data: avgParkingTimeData } = useQuery({
+  const { data: avgParkingTimeData } = useQuery<AvgParkingTimeResponse>({
     queryKey: ['dashboard', 'avg-parking-time', subId],
-    queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/session/parking-time/avg?subId=${subId}`);
-      if (!response.ok) throw new Error('Failed to fetch avg parking time');
-      return response.json() as Promise<AvgParkingTimeResponse>;
-    },
-    enabled: !!subId,
+    queryFn: () => dashboardService.getAvgParkingTime(subId),
+    enabled: isValidSubId,
     staleTime: 300000,
     refetchInterval: 300000,
+    retry: 1,
   });
 
+  // Calculate peak hour from byHour array
+  const peakHourInfo = peakHourData?.byHour?.reduce((max, current) => 
+    (current.count > (max?.count ?? 0)) ? current : max
+  , peakHourData.byHour[0]);
+
   return {
-    currentlyInside: currentlyInsideData?.total ?? 0,
-    sessionCountToday: sessionCountData?.total ?? 0,
-    peakHour: peakHourData?.peakHour ?? null,
-    peakHourCount: peakHourData?.count ?? 0,
-    avgParkingTimeSec: avgParkingTimeData?.avgDurationSec ?? 0,
+    currentlyInside: currentlyInsideData?.totalSessions ?? 0,
+    sessionCountToday: sessionCountData?.totalSessions ?? 0,
+    peakHour: peakHourInfo?.hour ?? null,
+    peakHourCount: peakHourInfo?.count ?? 0,
+    avgParkingTimeSec: avgParkingTimeData?.avgSeconds ?? 0,
   };
 };
 
 export const useTodaySessions = (subId: string, search: string = '') => {
-  return useQuery({
+  const isValidSubId = Boolean(subId && subId !== 'default' && subId.length > 0);
+  
+  console.log('[useTodaySessions] Hook called with:', { subId, search, isValidSubId });
+  
+  return useQuery<SessionTodayResponse>({
     queryKey: ['dashboard', 'sessions-today', subId, search],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      params.append('subId', subId);
-      if (search) params.append('search', search);
-      
-      const response = await fetch(`${BASE_URL}/session/today?${params.toString()}`);
-      if (!response.ok) throw new Error('Failed to fetch today sessions');
-      return response.json() as Promise<SessionTodayResponse>;
-    },
-    enabled: !!subId,
+    queryFn: () => dashboardService.getTodaySessions(subId, search),
+    enabled: isValidSubId,
     staleTime: 30000,
     refetchInterval: 60000,
+    retry: 1,
   });
 };
