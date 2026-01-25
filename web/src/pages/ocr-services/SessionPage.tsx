@@ -30,8 +30,8 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
-import { useSessions } from "../../hooks/useSessions";
-import type { VehicleSession, SessionFilters } from "../../types/api.types";
+import { useSessions, useCountClosedSession } from "../../hooks/useSessions";
+import type { VehicleSession, SessionFilters, } from "../../types/api.types";
 import { format } from "date-fns";
 import { useSubIdContext } from "../../contexts/SubIdContext";
 
@@ -50,7 +50,8 @@ export default function SessionPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   
   const { data: sessionResponse, isLoading, error } = useSessions(filters, subId);
-
+  const { data: closedSessionData } = useCountClosedSession(subId);
+  
   // Format duration from seconds to human readable format
   const formatDuration = (seconds: number | null): string => {
     if (seconds === null) return "N/A";
@@ -182,7 +183,7 @@ export default function SessionPage() {
                     Closed
                   </p>
                   <p className="text-2xl font-bold text-green-500">
-                    {stats.completedSessions}
+                    {closedSessionData ? closedSessionData.totalSessions : 0}
                   </p>
                 </CardContent>
               </Card>

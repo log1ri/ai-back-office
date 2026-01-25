@@ -190,3 +190,60 @@ export class ApiError extends Error {
     this.response = response;
   }
 }
+
+export interface CountClosedSessionResponse {
+  totalSessions: number;
+  status: "CLOSED";
+}
+
+
+
+// session Dashboard
+export interface CurrentlyInsideResponse {
+  totalSessions: number;
+  status?: string;
+}
+
+export interface SessionCountResponse {
+  totalSessions: number;
+}
+
+export interface PeakHourResponse {
+  byHour: Array<{
+    hour: number;
+    count: number;
+  }>;
+}
+
+export interface AvgParkingTimeResponse {
+  startDate: string;
+  endDate: string;
+  totalSessions: number;
+  avgSeconds: number;
+}
+
+export interface TodaySession {
+  id: string;
+  organization: string;
+  subId: string;
+  reg_num: string;
+  province: string;
+  status: string;
+  entry: {
+    time: string;
+    camId: string;
+    logId: string;
+  } | null;
+  exit: {
+    time: string;
+    camId: string;
+    logId: string;
+  } | null;
+  durationSec: number | null;
+  lastSeenAt: string;
+}
+
+export interface SessionTodayResponse {
+  data: TodaySession[];
+  total_records: number;
+}

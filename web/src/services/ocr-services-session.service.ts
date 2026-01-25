@@ -1,5 +1,5 @@
 import { BaseHttpClient } from './base-http-client';
-import type { SessionFilters, SessionResponse } from '../types/api.types';
+import type { SessionFilters, SessionResponse,CountClosedSessionResponse } from '../types/api.types';
 
 
 export class OcrServicesSessionService extends BaseHttpClient {
@@ -18,6 +18,11 @@ export class OcrServicesSessionService extends BaseHttpClient {
         const url = `/api/v1/ocr-services-logs/session${queryString ? `?${queryString}` : ''}`;
             
         return this.get<SessionResponse>(url);
+    }
+
+    async getClosedSession(subId: string): Promise<CountClosedSessionResponse> {
+        const endpoint = `/api/v1/ocr-services-logs/session/closed-session/total?subId=${subId}`;
+        return this.get<CountClosedSessionResponse>(endpoint);
     }
 
 

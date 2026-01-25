@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import type { SessionFilters, SessionResponse } from '../types/api.types';
+import type { SessionFilters, SessionResponse, CountClosedSessionResponse } from '../types/api.types';
 import { ocrServicesSessionService } from '../services';
 // Query Keys
 export const SESSION_QUERY_KEYS = {
@@ -13,7 +13,7 @@ export const SESSION_QUERY_KEYS = {
 // Get sessions with filters
 export const useSessions = (filters?: SessionFilters, subId?: string) => {
   // Use default subId if not provided - you can get this from context or props
-  const defaultSubId = subId || '68df656cf21e1feb3e85421b';
+  const defaultSubId = subId || 'tes';
   
   return useQuery({
     queryKey: SESSION_QUERY_KEYS.list(filters || {}, defaultSubId),
@@ -46,5 +46,20 @@ export const useSession = (id: string) => {
     },
     enabled: !!id,
     staleTime: 30 * 1000,
+  });
+};
+
+
+// Get single session detail
+export const useCountClosedSession = (subId?: string) => {
+  const defaultSubId = subId || 'tes';
+  return useQuery({
+    queryKey: SESSION_QUERY_KEYS.detail(defaultSubId),
+    queryFn: async () => {
+      const response: CountClosedSessionResponse = await ocrServicesSessionService.getClosedSession(defaultSubId);
+      return response;
+    },
+    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 60 * 1000, // Refetch every minute
   });
 };
