@@ -371,7 +371,7 @@ export class OcrServicesLogsService {
       {
         $match: {
           subId,
-          createdAt: { $gte: start, $lte: end }, // เวลาเข้า (entry time)
+          createdAt: { $gte: start, $lte: end }, 
         },
       },
       {
@@ -405,7 +405,6 @@ export class OcrServicesLogsService {
     }
 
     const { startUtc: start, endUtc: end } = getTodayRangeUTC7();
-    console.log('Today UTC+7 Range:', start, end);
 
     const query: any = {
       subId: filter.subId,
@@ -434,14 +433,20 @@ export class OcrServicesLogsService {
 
     return { data };
   }
+
+  async countClosedSession(subId: string): Promise<{ totalSessions: number; status: 'CLOSED' }> {
+    if (!subId) {
+      throw new UnprocessableEntityException('subId is required');
+    }
+
+    const total = await this.ocrServiceSessionModel.countDocuments({
+      subId: subId,
+      status: 'CLOSED',
+    });
+
+    return { totalSessions: total, status: 'CLOSED' };
+  }
   
-
-
-
-
-
-
-
 
 
 

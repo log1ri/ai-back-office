@@ -59,6 +59,12 @@ export class OcrServicesLogsController {
   countCurrentlyInsideOpen(@Query('subId') subId: string) {
     return this.ocrServicesLogsService.countCurrentlyInsideOpen(subId);
   }
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.Admin, Role.Supervisor, Role.Manager, Role.Guest)
+  @Get('/session/closed-session/total')
+  countClosedSession(@Query('subId') subId: string) {
+    return this.ocrServicesLogsService.countClosedSession(subId);
+  }
 
   // avg parking time 7d
   @UseGuards(JwtAuthGuard, RolesGuard)
