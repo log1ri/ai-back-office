@@ -7,7 +7,7 @@ import type {
   SessionCountResponse,
   PeakHourResponse,
   AvgParkingTimeResponse
-} from '../services/ocr-service-dashboard.services';
+} from '../types/api.types';
 
 export { type TodaySession, type SessionTodayResponse };
 

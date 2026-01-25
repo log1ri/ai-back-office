@@ -1,63 +1,12 @@
 import { BaseHttpClient } from './base-http-client';
 import { ENV_CONFIG } from '../config/environment';
-
-// ===== INTERFACES =====
-export interface CurrentlyInsideResponse {
-  totalSessions: number;
-  status?: string;
-}
-
-export interface SessionCountResponse {
-  totalSessions: number;
-}
-
-export interface PeakHourResponse {
-  byHour: Array<{
-    hour: number;
-    count: number;
-  }>;
-}
-
-export interface AvgParkingTimeResponse {
-  startDate: string;
-  endDate: string;
-  totalSessions: number;
-  avgSeconds: number;
-}
-
-export interface TodaySession {
-  id: string;
-  organization: string;
-  subId: string;
-  reg_num: string;
-  province: string;
-  status: string;
-  entry: {
-    time: string;
-    camId: string;
-    logId: string;
-  } | null;
-  exit: {
-    time: string;
-    camId: string;
-    logId: string;
-  } | null;
-  durationSec: number | null;
-  lastSeenAt: string;
-}
-
-export interface SessionTodayResponse {
-  data: TodaySession[];
-  total_records: number;
-}
+import type { CurrentlyInsideResponse, SessionCountResponse, PeakHourResponse, AvgParkingTimeResponse, SessionTodayResponse, } from '../types/api.types';
 
 /**
  * OCR Services Dashboard Service
  * 
- * Service class สำหรับจัดการ Dashboard API calls
- * ใช้สำหรับดึงข้อมูลสถิติและ session ต่างๆ ของระบบ OCR
- * 
- * @extends BaseHttpClient
+ * Service class for Dashboard API calls
+ * Used to fetch statistics and sessions data for the OCR system
  */
 export class OcrServicesDashboardService extends BaseHttpClient {
   private readonly basePath = '/api/v1/ocr-services-logs';
@@ -67,9 +16,9 @@ export class OcrServicesDashboardService extends BaseHttpClient {
   }
 
   /**
-   * ดึงจำนวนรถที่อยู่ภายในปัจจุบัน
+   * Get the total number of cars currently inside
    * @param subId - Organization Sub ID
-   * @returns จำนวนรถทั้งหมดที่อยู่ภายใน
+   * @returns Total number of cars currently inside
    */
   async getCurrentlyInsideTotal(subId: string): Promise<CurrentlyInsideResponse> {
     const endpoint = `${this.basePath}/session/currently-inside/total?subId=${subId}`;
@@ -83,9 +32,9 @@ export class OcrServicesDashboardService extends BaseHttpClient {
   }
 
   /**
-   * ดึงจำนวน session ทั้งหมดของวันนี้
+   * Fetch Count session Today
    * @param subId - Organization Sub ID
-   * @returns จำนวน session ทั้งหมด
+   * @returns Count all session 
    */
   async getSessionCountToday(subId: string): Promise<SessionCountResponse> {
     const endpoint = `${this.basePath}/session/today/total?subId=${subId}`;
@@ -98,9 +47,9 @@ export class OcrServicesDashboardService extends BaseHttpClient {
   }
 
   /**
-   * ดึงข้อมูลช่วงเวลาที่มีรถเข้ามากที่สุด (7 วันย้อนหลัง)
+   * fetch Peak Hour Entry (last 7 days)
    * @param subId - Organization Sub ID
-   * @returns ชั่วโมงที่มีรถเข้ามากที่สุดและจำนวน
+   * @returns most frequent hour and its count
    */
   async getPeakHourEntry(subId: string): Promise<PeakHourResponse> {
     const endpoint = `${this.basePath}/session/entry/peak-hour?subId=${subId}`;
@@ -108,9 +57,9 @@ export class OcrServicesDashboardService extends BaseHttpClient {
   }
 
   /**
-   * ดึงเวลาจอดรถเฉลี่ย (7 วันย้อนหลัง)
+   * fetch Average Parking Time (last 7 days)
    * @param subId - Organization Sub ID
-   * @returns เวลาเฉลี่ยในหน่วยวินาที
+   * @returns average parking time in seconds
    */
   async getAvgParkingTime(subId: string): Promise<AvgParkingTimeResponse> {
     const endpoint = `${this.basePath}/session/parking-time/avg?subId=${subId}`;
@@ -118,10 +67,10 @@ export class OcrServicesDashboardService extends BaseHttpClient {
   }
 
   /**
-   * ดึงรายการ session ทั้งหมดของวันนี้
+   * fetch all sessions of today
    * @param subId - Organization Sub ID
-   * @param search - คำค้นหาทะเบียนรถ (optional)
-   * @returns รายการ session ทั้งหมด
+   * @param search - search by vehicle registration number (optional)
+   * @returns all sessions of today
    */
   async getTodaySessions(subId: string, search?: string): Promise<SessionTodayResponse> {
     const params = new URLSearchParams({ subId });
@@ -141,8 +90,9 @@ export class OcrServicesDashboardService extends BaseHttpClient {
 
   /**
    * ดึงข้อมูลสถิติทั้งหมดของ Dashboard พร้อมกัน
+   * fetch all dashboard statistics
    * @param subId - Organization Sub ID
-   * @returns สถิติทั้งหมด
+   * @returns all dashboard statistics
    */
   async getDashboardStats(subId: string) {
     const [currentlyInside, sessionCountToday, peakHour, avgParkingTime] = await Promise.all([
