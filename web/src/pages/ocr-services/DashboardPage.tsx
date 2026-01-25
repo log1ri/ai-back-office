@@ -149,7 +149,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Real-time Activity Table */}
           <div className="lg:col-span-2">
-            <Card>
+          <Card className="h-full border">
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
                   <CardTitle>
@@ -189,18 +189,18 @@ export default function DashboardPage() {
                         </TableRow>
                       ) : error ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center text-red-500 py-12">
+                          <TableCell colSpan={5} className="text-center text-red-500 py-40">
                             Error loading data
                           </TableCell>
                         </TableRow>
                       ) : !sessionsData?.data || sessionsData.data.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center text-muted-foreground py-12">
+                          <TableCell colSpan={5} className="text-center text-muted-foreground py-40">
                             {searchTerm ? (
                               `No vehicles found matching "${searchTerm}"`
                             ) : (
-                              <div className="space-y-2">
-                                <Car className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                              <div className="flex flex-col items-center space-y-2">
+                                <Car className="h-12 w-12 text-muted-foreground/50" />
                                 <p className="font-medium">No vehicle activity detected</p>
                                 <p className="text-sm">Waiting for vehicles to enter...</p>
                               </div>
@@ -251,12 +251,12 @@ export default function DashboardPage() {
                   </Table>
                 </div>
               </CardContent>
-            </Card>
+              </Card>
           </div>
 
           {/* Traffic Chart */}
           <div className="lg:col-span-1">
-            <Card className="h-full">
+            <Card className="h-full border">
               <CardHeader className="border-b">
                 <CardTitle className="text-lg">Today's Traffic</CardTitle>
                 <p className="text-muted-foreground text-sm">Hourly vehicle entries</p>
