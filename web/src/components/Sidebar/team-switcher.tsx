@@ -67,9 +67,9 @@ export function TeamSwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center"
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden group-data-[collapsible=icon]:hidden">
+              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
                 <TeamLogo team={activeTeam} />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
@@ -79,7 +79,7 @@ export function TeamSwitcher({
               <ChevronsUpDown className="ml-auto group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <SidebarMenuAction className="hidden group-data-[collapsible=icon]:flex" asChild>
+          <SidebarMenuAction className="hidden" asChild>
             <div className="flex aspect-square h-8 w-8 items-center justify-center rounded-lg overflow-hidden bg-white p-1">
               <TeamLogo team={activeTeam} size={28} />
             </div>
