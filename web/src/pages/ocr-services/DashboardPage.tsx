@@ -222,15 +222,25 @@ export default function DashboardPage() {
                             </TableCell>
                             <TableCell>{session.province}</TableCell>
                             <TableCell>
-                              {session.status === 'ONGOING' || !session.exit ? (
+                              {session.status === 'OPEN' ? (
                                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                                   <Clock className="h-4 w-4" />
                                   <span className="font-medium">Inside</span>
                                 </div>
-                              ) : session.status === 'COMPLETED' ? (
+                              ) : session.status === 'CLOSED' ? (
                                 <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                                   <ArrowUpCircle className="h-4 w-4" />
                                   <span className="font-medium">Completed</span>
+                                </div>
+                              ) : session.status === 'CONFLICT' ? (
+                                <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+                                  <ArrowDownCircle className="h-4 w-4" />
+                                  <span className="font-medium">Conflict</span>
+                                </div>
+                              ) : session.status === 'ABANDONED' ? (
+                                <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                                  <ArrowDownCircle className="h-4 w-4" />
+                                  <span className="font-medium">Abandoned</span>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
