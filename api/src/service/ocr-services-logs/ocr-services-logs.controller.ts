@@ -12,20 +12,27 @@ import { Role } from '../auth/enums/role.enum';
 @Controller('ocr-services-logs')
 export class OcrServicesLogsController {
   constructor(private readonly ocrServicesLogsService: OcrServicesLogsService) {}
-
+  
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Supervisor)
   @Get("all")
   findAll() {
     return this.ocrServicesLogsService.findAll();
   }
-
+  
   // ocr-log pagination and filter
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Supervisor, Role.Manager, Role.Guest)
   @Get("/filter")
   findByFilter(@Request() req, @Query() filter: FilterOcrServicesLogDto) {
     return this.ocrServicesLogsService.findByFilter(filter);
+  }
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Supervisor, Role.Manager)
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.ocrServicesLogsService.findOne(id);
   }
 
   // ocr-session pagination and filter
@@ -59,6 +66,8 @@ export class OcrServicesLogsController {
   countCurrentlyInsideOpen(@Query('subId') subId: string) {
     return this.ocrServicesLogsService.countCurrentlyInsideOpen(subId);
   }
+
+  // count closed session
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Supervisor, Role.Manager, Role.Guest)
   @Get('/session/closed-session/total')
@@ -82,11 +91,13 @@ export class OcrServicesLogsController {
     return this.ocrServicesLogsService.peakEntryHour(subId);
   }
 
-
+  // mean duration (all time)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Supervisor, Role.Manager)
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ocrServicesLogsService.findOne(id);
+  @Roles(Role.Admin, Role.Supervisor, Role.Manager, Role.Guest)
+  @Get('/session/duration/mean/all-time')
+  getMeanDurationAllTime(@Query('subId') subId: string) {
+    return this.ocrServicesLogsService.meanDurationSecAllTime(subId);
   }
+
+
 }

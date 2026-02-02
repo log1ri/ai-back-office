@@ -448,6 +448,49 @@ export class OcrServicesLogsService {
   }
   
 
+  async meanDurationSecAllTime(subId: string): Promise<{totalSessions: number;  meanSeconds: number;
+  }> {
+
+    if (!subId) {
+      throw new UnprocessableEntityException('subId is required');
+    }
+
+    const result = await this.ocrServiceSessionModel.aggregate([
+      {
+        $match: {
+          subId,
+          status: 'CLOSED',
+          durationSec: { $type: 'number', $gt: 0 },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalSessions: { $sum: 1 },
+          meanSeconds: { $avg: '$durationSec' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalSessions: 1,
+          meanSeconds: { $ifNull: ['$meanSeconds', 0] },
+        },
+      },
+    ]);
+
+    const row = result?.[0] ?? {
+      totalSessions: 0,
+      meanSeconds: 0,
+    };
+
+    return {
+      totalSessions: row.totalSessions,
+      meanSeconds: row.meanSeconds,
+     
+    };
+  }
+
 
 
 }
