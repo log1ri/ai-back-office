@@ -17,3 +17,5 @@ dist
 .npmrc
 .eslint*
 .prettier*
+.env
+.env.*
