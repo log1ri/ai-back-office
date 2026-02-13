@@ -765,8 +765,8 @@ class UnifiedApiClient {
     email: string;
     password: string;
     firstname: string;
-    lastname: string;
-    position: string;
+    lastName: string;
+    position?: string;
   }) {
     return this.request('/api/v1/auth/sign-up', {
       method: 'POST',

@@ -65,8 +65,7 @@ const LoginPage: React.FC = () => {
         data.email,
         data.password,
         data.firstname,
-        data.lastName,
-        ""
+        data.lastName
       );
       if (success) {
         setShowRegisterSuccess(true);

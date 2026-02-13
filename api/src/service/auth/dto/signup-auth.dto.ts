@@ -16,11 +16,11 @@ export class SignupAuthDto {
 
     @IsString()
     @IsNotEmpty({ message: 'Lastname is required.' })
-    lastname: string;
+    lastName: string;
 
     @IsString()
-    @IsNotEmpty({ message: 'Position is required.' })
-    position: string; // Optional field
+    @IsOptional()
+    position?: string; // Optional field
 
     @IsString()
     @IsOptional()

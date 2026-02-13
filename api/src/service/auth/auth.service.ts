@@ -26,7 +26,7 @@ export class AuthService {
   async signUp(createAuthDto: SignupAuthDto) {
 
     // Check if the user already exists
-    const { email, firstname, lastname, position } = createAuthDto;
+    const { email, firstname, lastName, position } = createAuthDto;
     const existingUser = await this.userModel.findOne({ email });
     // If user exists, throw an error
     if (existingUser) {
@@ -37,7 +37,7 @@ export class AuthService {
       email,
       password: createAuthDto.password,
       firstname,
-      lastname,
+      lastname: lastName,
       position,
       createdAt: createAuthDto.createdAt,
       updatedAt: createAuthDto.updatedAt,

@@ -50,10 +50,6 @@ export const registerSchema = z.object({
   confirmPassword: z
     .string()
     .min(1, 'Please confirm your password'),
-  position: z
-    .string()
-    .min(1, 'Position is required')
-    .min(2, 'Position must be at least 2 characters'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],

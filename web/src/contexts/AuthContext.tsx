@@ -231,17 +231,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     password: string,
     firstname: string,
     lastName: string,
-    position: string
+    position?: string
   ): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const result = await apiClient.registerUser({
+      const payload: any = {
         email,
         password,
         firstname,
-        lastname: lastName,
-        position
-      });
+        lastName
+      };
+      if (position) {
+        payload.position = position;
+      }
+      const result = await apiClient.registerUser(payload);
       setIsLoading(false);
       if (typeof result === 'object' && result !== null && 'success' in result) {
         return (result as any).success;
