@@ -8,7 +8,7 @@ class CorsIoAdapter extends IoAdapter {
     const server = super.createIOServer(port, {
       ...options,
       cors: {
-        origin: process.env.ENV === 'production' ? 'https://your-production-url.com' : ['http://localhost:5174', 'http://localhost:3000'],
+        origin: process.env.ENV === 'production' ? process.env.FRONTEND_ORIGIN : ['http://localhost:5174', 'http://localhost:3000'],
         methods: ['GET', 'POST'],
         credentials: true,
       },
@@ -25,7 +25,7 @@ async function bootstrap() {
   
   // Enable CORS
   app.enableCors({
-    origin: process.env.ENV === 'production' ? 'https://your-production-url.com' : '*',
+    origin: process.env.ENV === 'production' ? process.env.FRONTEND_ORIGIN : '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
   });

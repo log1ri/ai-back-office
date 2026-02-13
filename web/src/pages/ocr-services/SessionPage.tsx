@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
-import { useSessions, useCountClosedSession } from "../../hooks/useSessions";
+import { useSessions, useCountClosedSession, useMeanDurationAllTime } from "../../hooks/useSessions";
 import { useDashboardStats} from "../../hooks/useDashboardStats";
 import type { VehicleSession, SessionFilters, } from "../../types/api.types";
 import { format } from "date-fns";
@@ -52,6 +52,7 @@ export default function SessionPage() {
   
   const { data: sessionResponse, isLoading, error } = useSessions(filters, subId);
   const { data: closedSessionData} = useCountClosedSession(subId);
+  const { data: meanDurationData} = useMeanDurationAllTime(subId);
   const {currentlyInside} = useDashboardStats(subId || "");
   
   // Format duration from seconds to human readable format
@@ -132,10 +133,6 @@ export default function SessionPage() {
   // Calculate stats from session data
   const stats = sessionResponse ? {
     totalSessions: sessionResponse.total_records,
-    averageDuration: sessionResponse.data
-      .filter(s => s.durationSec !== null)
-      .reduce((sum, s) => sum + (s.durationSec || 0), 0) / 
-      sessionResponse.data.filter(s => s.durationSec !== null).length || 0
   } : null;
 
   return (
@@ -194,7 +191,7 @@ export default function SessionPage() {
                     Average Time
                   </p>
                   <p className="text-2xl font-bold text-purple-500">
-                    {formatDuration(stats.averageDuration)}
+                    {formatDuration(meanDurationData?.meanSeconds ?? 0)}
                   </p>
                 </CardContent>
               </Card>

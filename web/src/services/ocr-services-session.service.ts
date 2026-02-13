@@ -1,5 +1,5 @@
 import { BaseHttpClient } from './base-http-client';
-import type { SessionFilters, SessionResponse,CountClosedSessionResponse } from '../types/api.types';
+import type { SessionFilters, SessionResponse,CountClosedSessionResponse, MeanDurationResponse } from '../types/api.types';
 
 
 export class OcrServicesSessionService extends BaseHttpClient {
@@ -25,5 +25,9 @@ export class OcrServicesSessionService extends BaseHttpClient {
         return this.get<CountClosedSessionResponse>(endpoint);
     }
 
+    async getMeanDurationSecAllTime(subId: string): Promise<MeanDurationResponse> {
+        const endpoint = `/api/v1/ocr-services-logs/session/duration/mean/all-time?subId=${subId}`;
+        return this.get<MeanDurationResponse>(endpoint);
+    }
 
 }

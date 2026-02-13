@@ -247,3 +247,8 @@ export interface SessionTodayResponse {
   data: TodaySession[];
   total_records: number;
 }
+
+export interface MeanDurationResponse {
+  totalSessions: number;  
+  meanSeconds: number;
+}

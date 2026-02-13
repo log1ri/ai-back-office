@@ -250,9 +250,12 @@ export default function DashboardPage() {
                               )}
                             </TableCell>
                             <TableCell className="text-sm">
-                              {session.durationSec !== null 
+                              {session.status === 'ABANDONED'
+                                ? "TimeOut"
+                                : session.durationSec !== null 
                                 ? formatDuration(session.durationSec)
-                                : (session.entry?.time ? getCurrentDuration(session.entry.time) : '—')}
+                                : (session.entry?.time ? getCurrentDuration(session.entry.time) : '—')
+                              }
                             </TableCell>
                           </TableRow>
                         ))

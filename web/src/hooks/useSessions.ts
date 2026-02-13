@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import type { SessionFilters, SessionResponse, CountClosedSessionResponse } from '../types/api.types';
+import type { SessionFilters, SessionResponse, CountClosedSessionResponse, MeanDurationResponse } from '../types/api.types';
 import { ocrServicesSessionService } from '../services';
 // Query Keys
 export const SESSION_QUERY_KEYS = {
@@ -8,6 +8,7 @@ export const SESSION_QUERY_KEYS = {
   list: (filters: SessionFilters, subId?: string) => [...SESSION_QUERY_KEYS.lists(), filters, subId] as const,
   details: () => [...SESSION_QUERY_KEYS.all, 'detail'] as const,
   detail: (id: string) => [...SESSION_QUERY_KEYS.details(), id] as const,
+  meanDurationAllTime: (subId: string) => ['session', subId, 'mean-duration-all-time'] as const,
 };
 
 // Get sessions with filters
@@ -50,7 +51,7 @@ export const useSession = (id: string) => {
 };
 
 
-// Get single session detail
+// Get close session 
 export const useCountClosedSession = (subId?: string) => {
   const defaultSubId = subId || 'tes';
   return useQuery({
@@ -63,3 +64,18 @@ export const useCountClosedSession = (subId?: string) => {
     refetchInterval: 60 * 1000, // Refetch every minute
   });
 };
+
+// Get mean duration all time
+export const useMeanDurationAllTime = (subId?: string) => {
+  const defaultSubId = subId || 'tes';
+  return useQuery({
+    queryKey: SESSION_QUERY_KEYS.meanDurationAllTime(defaultSubId),
+    queryFn: async () => {
+      const response: MeanDurationResponse = await ocrServicesSessionService.getMeanDurationSecAllTime(defaultSubId);
+      return response;
+    },
+    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 60 * 1000, // Refetch every minute
+  })
+
+}
