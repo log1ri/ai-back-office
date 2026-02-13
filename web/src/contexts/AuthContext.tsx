@@ -15,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string, firstname: string, lastName: string, position: string) => Promise<boolean>; 
+  register: (email: string, password: string, firstname: string, lastName: string, position?: string) => Promise<boolean>; 
   logout: () => void;
   refreshToken: () => Promise<string | null>;
   isTokenExpired: () => boolean;
