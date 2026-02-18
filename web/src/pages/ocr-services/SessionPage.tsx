@@ -142,7 +142,7 @@ export default function SessionPage() {
         <div className="flex flex-col gap-4">
           <div>
             <h1 className="text-3xl font-bold">
-              Parking Sessions
+              Sessions
             </h1>
             <p className="text-muted-foreground mt-1">
               Review vehicle entry and exit history

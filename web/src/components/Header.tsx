@@ -22,7 +22,8 @@ function Header({ onToggleTheme, theme }: HeaderProps) {
     
     // OCR Services routes
     if (pathname.includes("/ocr-services/")) {
-      if (pathname.includes("/overview")) return "Dashboard";
+      if (pathname.includes("/overview")) return "Overview";
+      if (pathname.includes("/sessions")) return "Sessions";
       if (pathname.includes("/home")) return "Image Log";
       if (pathname.includes("/issues")) return "Image Issues";
       if (pathname === "/ocr-services" || pathname === "/ocr-services/") return "OCR Services";
