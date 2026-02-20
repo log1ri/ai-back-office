@@ -12,7 +12,7 @@ export const ENV_CONFIG = {
   // Authentication
   DEFAULT_USER_ID: import.meta.env.VITE_DEFAULT_USER_ID || 'user123',
 
-  // Backend API (เพื่อนของคุณ)ฟ
+  // Backend API 
   BACKEND_API_URL: import.meta.env.VITE_API_URL || 'http://localhost:5167',
   BACKEND_API_KEY: import.meta.env.VITE_API_KEY || '',
 
@@ -31,7 +31,7 @@ export const BACKEND_ENDPOINTS = {
   LOGIN: 'api/v1/auth/sign-in',
   LOGOUT: 'api/v1/auth/logout',
   REGISTER: 'api/v1/auth/sign-up',
-  REFRESH_TOKEN: 'api/v1/auth/refresh',
+  REFRESH_TOKEN: 'api/v1/auth/refresh-token',
   
   // Users
   USERS: 'api/v1/users',

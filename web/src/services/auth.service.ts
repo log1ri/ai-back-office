@@ -19,7 +19,7 @@ export class AuthService extends BaseHttpClient {
   }
 
   async refreshToken(refreshToken: string): Promise<ApiResponse<AuthResponse>> {
-    return this.post<ApiResponse<AuthResponse>>('/api/v1/auth/refresh', { refreshToken });
+    return this.post<ApiResponse<AuthResponse>>('/api/v1/auth/refresh-token', { refreshToken });
   }
 
   async register(userData: {
