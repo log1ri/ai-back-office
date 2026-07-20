@@ -54,9 +54,11 @@ export class OcrServicesLogsService {
         this.ocrServiceLogModel.countDocuments(query)
       ]);
 
-      // Format image URLs
+      // Format image URLs — full URL with domain and signed URL for access)
+      // storage key (no domain)
       const formattedStringKey = (str: string) => {
-        return str.split(".com/")[1]
+        if (!str) return '';
+        return str.includes(".com/") ? str.split(".com/")[1] : str;
       };
 
       // Map through data to format image URLs

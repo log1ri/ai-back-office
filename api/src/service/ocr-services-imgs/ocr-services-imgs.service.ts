@@ -40,13 +40,15 @@ export class OcrServicesImgsService {
     }
     
     this.s3 = new S3Client({
-      region: 'sgp1',
+      region: 'auto',
       endpoint: this.endpoint,
       credentials: {
         accessKeyId: this.configService.get<string>('DO_SPACES_KEY')!,
         secretAccessKey: this.configService.get<string>('DO_SPACES_SECRET')!,
       },
       maxAttempts: 3,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
     });
   }
 
