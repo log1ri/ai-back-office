@@ -1,211 +1,145 @@
-# 🚀 AI Back-Office OCR Service - Frontend Web Application
+# AI Back-Office OCR Service — Frontend Web Application
 
-ระบบ Frontend Web Application ทำหน้าที่เป็นส่วนติดต่อกับผู้ใช้งาน เพื่อให้ผู้ใช้สามารถเข้าถึงฟังก์ชันทั้งหมดของระบบ AI Back-Office OCR Service ผ่านเว็บเบราว์เซอร์ได้อย่างสะดวก โดยพัฒนาด้วย **React + TailwindCSS + Vite + TypeScript** ทำงานแบบ **Single Page Application (SPA)** เพื่อให้การโหลดหน้าเว็บรวดเร็วและรองรับการสื่อสารกับ Backend แบบเรียลไทม์ผ่าน **REST API** และ **WebSocket**
+Frontend web application for the AI Back-Office OCR Service. Built with **React + TailwindCSS + Vite + TypeScript** as a **Single Page Application (SPA)**, communicating with the backend via **REST API** and **WebSocket**.
 
-## 🎯 ฟีเจอร์หลัก
+## Core Features
 
-- ✅ **Authentication & Authorization**: JWT-based authentication พร้อม Role-Based Access Control (RBAC)
-- 📊 **Dashboard & Analytics**: แดชบอร์ดแสดงสถิติการใช้งาน OCR พร้อมกราฟเรียลไทม์
-- 🖼️ **OCR Image Management**: ดูภาพที่ประมวลผล ตรวจสอบคุณภาพ และให้คะแนนภาพ
-- 📝 **OCR Log Tracking**: ติดตามประวัติการประมวลผล OCR แบบเรียลไทม์
-- 🔄 **Session Management**: จัดการ Session การใช้งาน OCR Service
-- ⚠️ **Image Issue Detection**: ตรวจจับและจัดการปัญหาภาพที่ประมวลผลไม่สำเร็จ
-- 👥 **User & Organization Management**: จัดการผู้ใช้และองค์กรแบบแบ่งระดับ (Multi-tenant)
-- 💰 **Rate Model & Pricing**: ตรวจสอบราคาและการใช้งานแบบครบวงจร
-- 📥 **Bulk Image Download**: ดาวน์โหลดภาพเป็น ZIP สำหรับปรับปรุงโมเดล AI
-- 🔔 **Real-time Notifications**: รับการแจ้งเตือนแบบเรียลไทม์ผ่าน WebSocket
+- **Authentication & Authorization**: JWT-based authentication with Role-Based Access Control (RBAC)
+- **Dashboard & Analytics**: usage dashboards with real-time charts
+- **OCR Image Management**: view processed images, check quality, and rate images
+- **OCR Log Tracking**: real-time tracking of OCR processing history
+- **Session Management**: manage OCR service usage sessions
+- **Image Issue Detection**: detect and manage images that failed processing
+- **User & Organization Management**: multi-tenant user/org management
+- **Rate Model & Pricing**: pricing and usage overview
+- **Bulk Image Download**: download images as ZIP for model improvement
+- **Real-time Notifications**: via WebSocket
 
-## 🏗️ สถาปัตยกรรมและเทคโนโลยีที่ใช้
+## Tech Stack
 
-### Core Technologies
-
-| เทคโนโลยี | เวอร์ชัน | หน้าที่ |
+| Technology | Version | Purpose |
 |-----------|---------|---------|
-| **React** | 19.1.0 | UI Library สำหรับสร้าง Component |
-| **Vite** | 7.2.2 | Build Tool & Dev Server แบบเร็วสูง |
-| **TypeScript** | 5.8.3 | Type Safety ลดบัคและอ่านโค้ดง่าย |
-| **TanStack Router** | 1.130.2 | File-based Routing + Protected Routes |
-| **TanStack Query** | 5.83.0 | Server State Management + Caching |
-| **TailwindCSS** | 4.1.10 | Utility-first CSS Framework |
-| **shadcn/ui** | Latest | Pre-built UI Components |
-| **Socket.IO Client** | 4.8.1 | WebSocket สำหรับ Realtime Communication |
-| **React Hook Form** | 7.58.1 | Form Management & Validation |
-| **Zod** | 3.25.67 | Schema Validation |
-| **Recharts** | 3.0.2 | Data Visualization Library |
+| **React** | 19.1.0 | UI library |
+| **Vite** | 7.2.2 | Build tool & dev server |
+| **TypeScript** | 5.8.3 | Type safety |
+| **TanStack Router** | 1.130.2 | File-based routing + protected routes |
+| **TanStack Query** | 5.83.0 | Server state management + caching |
+| **TailwindCSS** | 4.1.10 | Utility-first CSS framework |
+| **shadcn/ui** | Latest | Pre-built UI components |
+| **Socket.IO Client** | 4.8.1 | WebSocket / realtime communication |
+| **React Hook Form** | 7.58.1 | Form management & validation |
+| **Zod** | 3.25.67 | Schema validation |
+| **Recharts** | 3.0.2 | Data visualization |
 
 ### Key Features
 
-1. **Routing**: TanStack Router
-   - โครงสร้างเส้นทางแบบ Declarative & Nested Routes
-   - Protected Route ตรวจสอบ JWT/Role ก่อนเข้าหน้า
-   - Type-safe routing parameters
+1. **Routing**: TanStack Router — declarative/nested routes, protected routes with JWT/role checks, type-safe params
+2. **Data Fetching**: TanStack Query — caching, refetching, background updates, integrated with the custom HTTP client and JWT
+3. **UI & Styling**: TailwindCSS + shadcn/ui — responsive design, dark mode, ready-made components (table, modal, button, form, chart)
+4. **Authentication**: JWT + RBAC — access/refresh tokens in `localStorage`, role-based permissions, auto token refresh
+5. **Realtime**: Socket.IO client — receives log update events, JWT auth on the WebSocket handshake, auto reconnection
+6. **Forms**: React Hook Form + Zod — client-side validation, type-safe form data
 
-2. **Data Fetching**: TanStack Query (React Query)
-   - จัดการ Caching, Refetching และ Background Updates
-   - Optimistic Updates สำหรับ UX ที่ดีขึ้น
-   - ผสานกับ Base HTTP Client พร้อม JWT Token
-
-3. **UI & Styling**: TailwindCSS + shadcn/ui
-   - Responsive Design ครอบคลุมทุกอุปกรณ์
-   - Dark Mode Support
-   - Component Library พร้อมใช้: Table, Modal, Button, Form, Chart
-
-4. **Authentication**: JWT + RBAC
-   - Access Token & Refresh Token ใน localStorage
-   - Role-based Permission (Admin, User, Viewer)
-   - Auto Token Refresh
-
-5. **Realtime**: Socket.IO Client
-   - รับ Event การอัปเดต Log แบบเรียลไทม์
-   - JWT Authentication ใน WebSocket Handshake
-   - Auto Reconnection
-
-6. **Forms**: React Hook Form + Zod
-   - Client-side Validation
-   - Type-safe Form Data
-   - Error Handling UI
-
-## 📁 โครงสร้างโปรเจกต์
+## Project Structure
 
 ```
 web/
-├── .tanstack/              # TanStack Router generated files
-├── node_modules/           # Dependencies
+├── node_modules/
 ├── public/                 # Static assets
-│   ├── AI-LPR.png
-│   ├── LPR Eye-logo.png
-│   ├── LPR Eye.ico
-│   ├── best-practices.md
-│   ├── changelog.md
-│   └── usage-examples.md
 ├── src/
-│   ├── assets/            # Images, icons, media
-│   ├── components/        # Reusable React Components
-│   │   ├── charts/       # Chart components (4 files)
-│   │   ├── dashboard/    # Dashboard widgets (3 files)
-│   │   ├── Sidebar/      # Sidebar navigation (4 files)
-│   │   └── ui/           # shadcn/ui components (26 files)
-│   ├── config/           # Configuration files
-│   │   ├── auth.schema.ts
-│   │   ├── email-domains.config.ts
-│   │   ├── environment.ts
-│   │   └── sidebar.config.ts
-│   ├── constants/        # App constants
-│   ├── contexts/         # React Context providers
-│   │   ├── AuthContext.tsx
-│   │   ├── BackendAuthContext.tsx
-│   │   └── SubIdContext.tsx
-│   ├── hooks/            # Custom React Hooks (21 hooks)
-│   │   ├── useAuth.ts
-│   │   ├── useAuthTokens.ts
-│   │   ├── useOcrLogs.ts
-│   │   ├── useRealtimeLogs.ts
-│   │   └── ...
-│   ├── lib/              # Utility libraries
-│   │   ├── api-client.ts
-│   │   ├── query-client.ts
-│   │   └── utils.ts
-│   ├── pages/            # Page components
-│   │   ├── LoginPage.tsx
-│   │   ├── BackendLoginPage.tsx
-│   │   └── ocr-services/
-│   │       ├── DashboardPage.tsx
-│   │       ├── ImageLogPage.tsx
-│   │       ├── ImageIssuePage.tsx
-│   │       └── SessionPage.tsx
-│   ├── routes/           # Route definitions
-│   │   ├── __root.tsx
-│   │   ├── index.tsx
-│   │   ├── login.tsx
-│   │   └── ocr-services/
-│   ├── services/         # API service layer (13 services)
-│   │   ├── auth.service.ts
-│   │   ├── base-http-client.ts
-│   │   ├── ocr-services-log.service.ts
-│   │   ├── user.service.ts
-│   │   └── ...
-│   ├── types/           # TypeScript type definitions
-│   │   ├── api.types.ts
-│   │   ├── sidebar.types.ts
-│   │   └── socket.types.ts
-│   ├── User/            # User module
-│   ├── utils/           # Utility functions
-│   ├── App.css
-│   ├── index.css
-│   ├── main.tsx         # App entry point
-│   ├── routeTree.gen.ts # Auto-generated routes
-│   └── vite-env.d.ts
+│   ├── assets/             # Images, icons, media
+│   ├── components/         # Reusable React components
+│   │   ├── charts/
+│   │   ├── dashboard/
+│   │   ├── Sidebar/
+│   │   └── ui/              # shadcn/ui components
+│   ├── config/              # environment.ts, sidebar.config.ts, auth.schema.ts, ...
+│   ├── constants/
+│   ├── contexts/            # AuthContext, BackendAuthContext, SubIdContext
+│   ├── hooks/                # Custom hooks (useAuth, useAuthTokens, useOcrLogs, useRealtimeLogs, ...)
+│   ├── lib/                  # api-client.ts, query-client.ts, utils.ts
+│   ├── pages/                # Page components
+│   ├── routes/                # TanStack Router route definitions
+│   ├── services/              # API service layer (auth, ocr-services-log, user, ...)
+│   ├── types/                 # TypeScript type definitions
+│   ├── utils/
+│   ├── main.tsx
+│   └── routeTree.gen.ts       # Auto-generated by TanStack Router
 ├── .dockerignore
-├── .env                  # Environment variables
+├── .env.production             # Build-time env vars (committed — see below)
 ├── .gitignore
 ├── bun.lock
-├── components.json       # shadcn/ui config
 ├── Dockerfile
-├── eslint.config.js
-├── index.html           # HTML entry point
 ├── package.json
-├── README.md
-├── tailwind.config.js
-├── tsconfig.json
-├── tsconfig.app.json
-├── tsconfig.node.json
 └── vite.config.ts
 ```
 
-## 🚀 การติดตั้งและรัน
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 20+ หรือ Bun 1.0+
-- Backend API running (API Gateway)
+- Node.js 20+ or Bun 1.0+
+- Backend API running (see `../api`)
 
 ### Installation
 
 ```bash
-# ติดตั้ง Dependencies
 bun install
-# หรือ
+# or
 npm install
 ```
 
 ### Development
 
 ```bash
-# รัน Development Server
 bun dev
-# หรือ
+# or
 npm run dev
 ```
 
-เปิดเบราว์เซอร์ที่ http://localhost:5173
+Open http://localhost:5173. The dev server proxies `/api` to `VITE_PROXY_TARGET` (defaults to `http://localhost:5167`) — see `vite.config.ts`.
 
-### Build Production
+### Production Build
 
 ```bash
-# Build สำหรับ Production
-bun run build
-# หรือ
-npm run build
-
-# Preview Production Build
-bun run preview
-# หรือ
-npm run preview
+bun run build      # runs `tsc -b && vite build`
+bun run preview     # serve the production build locally
 ```
 
-## 🔧 Environment Variables
+## Environment Variables
 
-สร้างไฟล์ `.env` และกำหนดค่าดังนี้:
+All variables are **build-time** — Vite inlines them into the JS bundle when `vite build` runs, so they are set once at build time, not read at container runtime. Since anything prefixed `VITE_` ends up in the public bundle shipped to the browser, none of these should be treated as secret.
+
+Read from `src/config/environment.ts` and `src/lib/api-client.ts`:
+
+| Variable | Default | Required in prod | Notes |
+|---|---|---|---|
+| `VITE_API_BASE_URL` | `http://localhost:5167` | **Yes** | Absolute backend URL. All requests are built as `baseUrl + endpoint` — there is no reverse proxy at runtime, so this must be the real, publicly reachable backend origin. |
+| `VITE_API_URL` | `http://localhost:5167` | **Yes** | Used as the `backendUrl` for requests made with `useBackend: true`. Normally the same value as `VITE_API_BASE_URL`. |
+| `VITE_API_KEY` | `''` | No | Sent as `X-API-Key` header on unauthenticated requests, only if set. |
+| `VITE_API_VERSION` | `v1` | No | |
+| `VITE_API_TIMEOUT` | `10000` | No | Request timeout, ms |
+| `VITE_API_MAX_RETRIES` | `3` | No | |
+| `VITE_API_RATE_LIMIT` | `100` | No | |
+| `VITE_API_CACHE_TTL` | `300000` | No | Client-side cache TTL, ms |
+| `VITE_PROXY_TARGET` | `http://localhost:5167` | No | Only used by the Vite dev server / `vite preview` proxy for `/api/*`. The app's actual fetch calls always use an absolute URL (`VITE_API_BASE_URL`), so this only matters for local development. |
+
+### Setting up for a real deployment
+
+Create/edit `web/.env.production` with the real backend URL:
 
 ```env
 VITE_API_BASE_URL=https://api.yourdomain.com
-VITE_WS_URL=wss://api.yourdomain.com
-VITE_APP_NAME=AI OCR Service
+VITE_API_URL=https://api.yourdomain.com
 ```
 
-## 🏗️ Architecture Highlights
+This file is committed to the repo (its values are just URLs, not secrets, and would be publicly visible in the bundle anyway) so any clean checkout builds correctly without extra manual steps. If a value ever needs to stay out of git, put it in `web/.env.production.local` instead — Vite loads it automatically and it overrides `.env.production`; it's already covered by `.gitignore`.
 
-### 1. Authentication Flow
+The backend must also allow this origin: set `FRONTEND_ORIGIN` in the API's `.env` to this web app's deployed URL (see `../api/README.md`).
+
+## Architecture Highlights
+
+### Authentication Flow
 
 ```
 Login → JWT Token → localStorage → HTTP Interceptor → Protected Routes
@@ -213,7 +147,7 @@ Login → JWT Token → localStorage → HTTP Interceptor → Protected Routes
                                             WebSocket Auth
 ```
 
-### 2. Data Flow
+### Data Flow
 
 ```
 Component → Custom Hook → TanStack Query → API Service → Backend API
@@ -221,106 +155,62 @@ Component → Custom Hook → TanStack Query → API Service → Backend API
                       Auto Refetch
 ```
 
-### 3. Real-time Updates
+### Real-time Updates
 
 ```
 Backend → WebSocket Event → Socket.IO Client → React State → UI Update
 ```
 
-### 4. API Communication
+### API Communication
 
-- Base HTTP Client พร้อม JWT Auto-attach
-- Error Handling แบบ Centralized
-- Auto Retry & Token Refresh
-- Type-safe Request/Response
+- Base HTTP client with JWT auto-attach
+- Centralized error handling
+- Auto retry & token refresh
+- Type-safe request/response
 
-## 📦 Key Dependencies
+## Key Dependencies
 
 ### Production
 
-- `@tanstack/react-query` - Server state management
-- `@tanstack/react-router` - Type-safe routing
-- `socket.io-client` - WebSocket communication
-- `react-hook-form` + `zod` - Form validation
-- `recharts` - Data visualization
-- `lucide-react` - Icon library
-- `date-fns` - Date utilities
-- `jwt-decode` - JWT parsing
-- `file-saver` + `jszip` - File downloads
+- `@tanstack/react-query` — server state management
+- `@tanstack/react-router` — type-safe routing
+- `socket.io-client` — WebSocket communication
+- `react-hook-form` + `zod` — form validation
+- `recharts` — data visualization
+- `lucide-react` — icon library
+- `date-fns` — date utilities
+- `jwt-decode` — JWT parsing
+- `file-saver` + `jszip` — file downloads
 
 ### Development
 
-- `@vitejs/plugin-react-swc` - Fast refresh
-- `@tanstack/router-plugin` - Route generation
-- `typescript-eslint` - Linting
-- `tailwindcss` - Styling
+- `@vitejs/plugin-react` — React fast refresh
+- `@tanstack/router-vite-plugin` — route generation
+- `typescript-eslint` — linting
+- `tailwindcss` — styling
 
-## 🔐 Security Features
-
-- JWT-based Authentication
-- Token Refresh Mechanism
-- Protected Routes by Role
-- XSS Protection
-- CORS Configuration
-- Environment Variable Protection
-
-## 📱 Responsive Design
-
-- Mobile-first approach
-- Breakpoints: sm, md, lg, xl, 2xl
-- Touch-friendly UI
-- Adaptive layouts
-
-## 🎨 UI Components
-
-จาก **shadcn/ui** รวม 26+ components:
-- Avatar, Badge, Breadcrumb, Button, Calendar
-- Card, Dialog, Dropdown, Input, Label
-- Popover, Select, Separator, Sheet, Sidebar
-- Skeleton, Switch, Table, Textarea, Tooltip
-- Data Table (with sorting, filtering, pagination)
-
-## 📚 Documentation
-
-- [Best Practices](./public/best-practices.md)
-- [Usage Examples](./public/usage-examples.md)
-- [Changelog](./public/changelog.md)
-
-## 🚢 Deployment
+## Deployment
 
 ### Docker
 
 ```bash
-# Build Docker Image
-docker build -t lpr-frontend .
-
-# Run Container
-docker run -p 80:80 lpr-frontend
+docker build -t ai-back-office-web ./web
+docker run -p 5173:5173 ai-back-office-web
 ```
 
-### DigitalOcean App Platform
+The image builds with `bunx vite build` (skips TypeScript type-checking during the Docker build for speed) and serves the build with `vite preview` on port 5173.
 
-1. Push code to Git repository
-2. Connect repository to App Platform
-3. Set environment variables
-4. Deploy automatically
+### Docker Compose
 
-## 🤝 Contributing
+The repo root has a `docker-compose.yml` that builds both `api` and `web` together:
 
-1. Fork the project
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
+```bash
+docker-compose build
+docker-compose up -d
+```
 
-## 📄 License
+Make sure `web/.env.production` and `api/.env` are populated with real values before building — see the Environment Variables section above and `../api/README.md`.
 
-This project is licensed under the ISC License.
+## License
 
-## 👨‍💻 Authors
-
-**Your Team Name**
-
----
-
-Built with ❤️ using React + Vite + TypeScript
+UNLICENSED (private)

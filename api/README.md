@@ -1,98 +1,137 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# AI Back-Office OCR Service — API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend API for the AI Back-Office OCR Service, built with **NestJS + MongoDB (Mongoose)**. Exposes a REST API under `/api/v1` plus a Socket.IO gateway for real-time OCR log updates, and stores processed images/files in DigitalOcean Spaces (S3-compatible).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tech Stack
 
-## Description
+- **NestJS 11** (Express platform)
+- **MongoDB** via `@nestjs/mongoose`
+- **JWT auth** via `@nestjs/jwt` + `passport`
+- **Socket.IO** via `@nestjs/platform-socket.io` / `@nestjs/websockets`
+- **DigitalOcean Spaces / S3** via `@aws-sdk/client-s3`
+- **bcryptjs** for password hashing
+- **archiver** for ZIP bundling (bulk image download)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Project Structure
 
-## Project setup
-
-```bash
-$ npm install
+```
+api/
+├── src/
+│   ├── common/
+│   │   └── dto/
+│   ├── service/
+│   │   ├── auth/                     # sign-up, sign-in, refresh-token
+│   │   ├── users/                    # user profile & management
+│   │   ├── ocr-services-imgs/        # OCR processed image management
+│   │   ├── ocr-services-logs/        # OCR processing logs + realtime gateway
+│   │   ├── ocr-services-orgs/        # organization / multi-tenant management
+│   │   ├── ocr-services-rate-model/  # rate model configuration
+│   │   ├── overall/                  # dashboard / overview stats
+│   │   └── price/                    # pricing
+│   ├── utils/
+│   ├── app.module.ts
+│   └── main.ts                       # bootstrap, global prefix, CORS, WS adapter
+├── test/                             # e2e tests
+├── Dockerfile
+└── .env.example
 ```
 
-## Compile and run the project
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+ or Bun 1.0+
+- A MongoDB instance (Atlas or self-hosted)
+- DigitalOcean Spaces (or S3-compatible) credentials, for image storage
+
+### Installation
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+# or
+bun install
 ```
 
-## Run tests
+### Environment Variables
+
+Copy `.env.example` to `.env` and fill in real values:
+
+| Variable | Description | Notes |
+|---|---|---|
+| `MONGODB_URI` | MongoDB connection string | required |
+| `JWT_SECRET` | Secret for signing access tokens | change from the example default before deploying |
+| `JWT_REFRESH_SECRET` | Secret for signing refresh tokens | change from the example default before deploying |
+| `JWT_EXPIRES_IN` | Access token TTL | e.g. `15m` |
+| `JWT_REFRESH_EXPIRES_IN` | Refresh token TTL | e.g. `120m` |
+| `DO_SPACES_KEY` / `DO_SPACES_SECRET` | DigitalOcean Spaces (S3-compatible) credentials | required for image upload/storage |
+| `DO_SPACES_BUCKET` | Spaces bucket name | required |
+| `DO_SPACES_ENDPOINT` | Spaces endpoint URL | required |
+| `ISSUE_PREFIX` | Key prefix for issue images | default: `ocr-services/subId/issue_images/process/` |
+| `PROCESS_PREFIX` | Key prefix for processed images | default: `ocr-services/subId/process/` |
+| `PORT` | HTTP port | default `5167` |
+| `ENV` | Set to `production` to enable strict CORS | **see warning below** |
+| `FRONTEND_ORIGIN` | Allowed CORS origin (REST + WebSocket) | the deployed web app's URL |
+
+**Production CORS warning**: CORS (`app.enableCors`) and the WebSocket adapter only restrict `origin` to `FRONTEND_ORIGIN` when `process.env.ENV === 'production'` (see `src/main.ts`). If `ENV` is unset, CORS is wide open (`*`). Always set **both** `ENV=production` and `FRONTEND_ORIGIN` together in production — setting one without the other leaves CORS open.
+
+### Development
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
+
+The API listens on `http://localhost:5167`, with all routes prefixed `api/v1` (e.g. `POST /api/v1/auth/sign-in`).
+
+### Production
+
+```bash
+npm run build
+npm run start:prod
+```
+
+### Tests
+
+```bash
+npm run test        # unit tests
+npm run test:e2e     # e2e tests
+npm run test:cov     # coverage
+```
+
+## API Modules
+
+| Module | Base path | Purpose |
+|---|---|---|
+| Auth | `/api/v1/auth` | sign-up, sign-in, refresh-token |
+| Users | `/api/v1/users` | user profile & management |
+| OCR Service Images | `/api/v1/ocr-services-imgs` | processed OCR image management |
+| OCR Service Logs | `/api/v1/ocr-services-logs` | OCR processing logs; also exposes a Socket.IO gateway for realtime log updates |
+| OCR Service Orgs | `/api/v1/ocr-services-orgs` | organization / multi-tenant management |
+| OCR Rate Model | `/api/v1/ocr-services-rate-model` | rate model configuration |
+| Overall | `/api/v1/overall` | dashboard / overview statistics |
+| Price | `/api/v1/price` | pricing |
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Docker
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker build -t ai-back-office-api ./api
+docker run -p 5167:5167 --env-file ./api/.env ai-back-office-api
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+The image is built with Bun (`oven/bun:1.2.18`), runs `bun run build`, and starts with `bun run dist/main.js`. `.env` is **not** copied into the image (excluded via `.dockerignore`) — inject it at container runtime via `--env-file` or your orchestrator's secret mechanism.
 
-## Resources
+### Docker Compose
 
-Check out a few resources that may come in handy when working with NestJS:
+The repo root `docker-compose.yml` builds this service together with `web`, loading env vars from `./api/.env`:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+docker-compose build
+docker-compose up -d
+```
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+See `../web/README.md` for the frontend counterpart.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+UNLICENSED (private)
