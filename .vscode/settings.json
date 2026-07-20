@@ -1,3 +1,5 @@
 {
-    "postman.settings.dotenv-detection-notification-visibility": false
+    "postman.settings.dotenv-detection-notification-visibility": false,
+    "typescript.tsdk": "api/node_modules/typescript/lib",
+    "js/ts.tsdk.path": "api/node_modules/typescript/lib"
 }
