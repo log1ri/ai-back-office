@@ -112,3 +112,7 @@ Populate `api/.env` (and `web/.env.production` if the backend URL differs) befor
 - **Frontend**: React, Vite, TypeScript, TanStack Query/Router, Tailwind CSS, shadcn/ui
 - **Storage**: S3-compatible object storage (Cloudflare R2)
 - **Deployment**: Docker (multi-stage builds), nginx (serves the built SPA + reverse-proxies `/api/*` in production)
+
+## Contributors
+
+- **Frontend**: [Andromedas47](https://github.com/Andromedas47)
