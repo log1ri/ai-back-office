@@ -119,7 +119,12 @@ docker build -t ai-back-office-api ./api
 docker run -p 5167:5167 --env-file ./api/.env ai-back-office-api
 ```
 
-The image is built with Bun (`oven/bun:1.2.18`), runs `bun run build`, and starts with `bun run dist/main.js`. `.env` is **not** copied into the image (excluded via `.dockerignore`) — inject it at container runtime via `--env-file` or your orchestrator's secret mechanism.
+Multi-stage build (`api/Dockerfile`):
+
+1. **Build stage** (`oven/bun:1.2.18`) — `bun install`, `bun run build`.
+2. **Runtime stage** (`oven/bun:1.2.18-alpine`) — reinstalls dependencies with `bun install --production` (no `@nestjs/cli`, TypeScript, Jest, ESLint, ...), copies in only the compiled `dist/` from the build stage, and starts with `bun run dist/main.js`. No source or devDependencies ship in the final image.
+
+`.env` is **not** copied into the image (excluded via `.dockerignore`) — inject it at container runtime via `--env-file` or your orchestrator's secret mechanism. Docker's build context for this image is `./api` only, so nothing outside that folder (including the repo-root `docs/` diagrams) is ever sent to the daemon or included in the image.
 
 ### Docker Compose
 

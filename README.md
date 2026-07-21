@@ -22,6 +22,16 @@ ai-back-office/
 - **api** — NestJS, MongoDB (Mongoose), JWT auth (access + refresh token), Socket.IO for realtime logs, images stored on an S3-compatible object store (Cloudflare R2)
 - **web** — React + Vite + TypeScript, TanStack Query/Router, shadcn/ui + Tailwind
 
+### Diagrams
+
+**System overview** — camera → VPN tunnel → server (`Ai pipeline` + `Back office`) → MongoDB Atlas / object storage → REST API consumed by the browser:
+
+![System diagram](docs/System_Diagram.png)
+
+**Infrastructure & containers** — the IP camera reaches the cloud over a VPN tunnel; two DigitalOcean VMs host this system's containers (`Ai pipeline` VM: AI processing + session cleanup, `Ai-Backoffice` VM: this repo's `frontend` + `backend API`), backed by MongoDB Atlas and S3-compatible object storage:
+
+![Infrastructure & Container Architecture](docs/Infrastructure%20%26%20Container%20Architecture.png)
+
 ### Backend modules (`api/src/service`)
 
 | Module | Responsibility |
@@ -88,9 +98,17 @@ Runs at `http://localhost:5173` (API runs at `http://localhost:5167/api/v1`)
 docker-compose up --build
 ```
 
+Both services build as multi-stage images — the build stage (Bun) is discarded, only the runtime output ships:
+
+- `api` — built with Bun, then reinstalled `--production` (no `nest` CLI/TypeScript/test tooling) and runs `bun run dist/main.js` on `:5167`
+- `web` — built with Vite, then served as static files by `nginx:1.27-alpine` on `:5173`; nginx reverse-proxies `/api/*` to the `api` container (`BACKEND_ORIGIN`, defaults to `http://api:5167` — set in `docker-compose.yml`)
+
+Populate `api/.env` (and `web/.env.production` if the backend URL differs) before building — see `api/README.md` and `web/README.md`. Each service's build context is its own subfolder (`./api`, `./web`), so `docs/` is never sent to Docker and never ends up in either image.
+
 ## Tech Stack
 
 - **Runtime/Package manager**: [Bun](https://bun.sh)
 - **Backend**: NestJS, MongoDB/Mongoose, Socket.IO, AWS SDK v3 (`@aws-sdk/client-s3`)
 - **Frontend**: React, Vite, TypeScript, TanStack Query/Router, Tailwind CSS, shadcn/ui
 - **Storage**: S3-compatible object storage (Cloudflare R2)
+- **Deployment**: Docker (multi-stage builds), nginx (serves the built SPA + reverse-proxies `/api/*` in production)

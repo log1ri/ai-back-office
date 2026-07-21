@@ -70,6 +70,7 @@ web/
 ├── .gitignore
 ├── bun.lock
 ├── Dockerfile
+├── nginx.conf.template         # Runtime nginx config (static serving + /api/* reverse proxy)
 ├── package.json
 └── vite.config.ts
 ```
@@ -195,21 +196,26 @@ Backend → WebSocket Event → Socket.IO Client → React State → UI Update
 
 ```bash
 docker build -t ai-back-office-web ./web
-docker run -p 5173:5173 ai-back-office-web
+docker run -p 5173:5173 -e BACKEND_ORIGIN=http://your-api-host:5167 ai-back-office-web
 ```
 
-The image builds with `bunx vite build` (skips TypeScript type-checking during the Docker build for speed) and serves the build with `vite preview` on port 5173.
+Multi-stage build (`web/Dockerfile`):
+
+1. **Build stage** (`oven/bun:1`) — `bunx vite build` (skips TypeScript type-checking during the Docker build for speed), producing static assets in `dist/`.
+2. **Runtime stage** (`nginx:1.27-alpine`) — serves `dist/` as static files on port 5173, and reverse-proxies `/api/*` to `BACKEND_ORIGIN` (see `nginx.conf.template`, rendered via nginx's built-in `envsubst` entrypoint). No Bun/Node/`node_modules`/source ships in the final image. The proxy also carries a SPA fallback (`try_files ... /index.html`) so client-side routes survive a hard refresh.
+
+`BACKEND_ORIGIN` is a **runtime** container env var read by nginx — separate from the `VITE_*` build-time vars above, which are baked into the JS bundle at build time. It defaults to `http://api:5167` (the docker-compose service name); override it when running the image outside that compose network.
 
 ### Docker Compose
 
-The repo root has a `docker-compose.yml` that builds both `api` and `web` together:
+The repo root has a `docker-compose.yml` that builds both `api` and `web` together and sets `BACKEND_ORIGIN=http://api:5167` for `web`:
 
 ```bash
 docker-compose build
 docker-compose up -d
 ```
 
-Make sure `web/.env.production` and `api/.env` are populated with real values before building — see the Environment Variables section above and `../api/README.md`.
+Make sure `web/.env.production` and `api/.env` are populated with real values before building — see the Environment Variables section above and `../api/README.md`. Docker's build context for this image is `./web` only, so nothing outside that folder (including the repo-root `docs/` diagrams) is ever sent to the daemon or included in the image.
 
 ## License
 
