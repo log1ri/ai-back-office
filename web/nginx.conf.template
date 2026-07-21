@@ -1,0 +1,31 @@
+server {
+    listen 5173;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Docker's embedded DNS. Resolve the upstream lazily (per-request) via the
+    # $backend_upstream variable below instead of at config-parse time — a
+    # literal hostname in proxy_pass makes nginx fail to start at all if that
+    # host isn't resolvable yet (e.g. the api container racing to come up).
+    resolver 127.0.0.11 valid=10s;
+
+    # Reverse-proxy relative /api/* calls (e.g. auth refresh-token, zip download)
+    # to the backend. Full incoming URI (including /api/v1/...) is forwarded
+    # unchanged since proxy_pass has no path component here.
+    location /api/ {
+        set $backend_upstream ${BACKEND_ORIGIN};
+        proxy_pass $backend_upstream;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # SPA fallback so client-side routes (TanStack Router) survive a hard refresh
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
