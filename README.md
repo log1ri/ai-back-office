@@ -24,11 +24,11 @@ ai-back-office/
 
 ### Diagrams
 
-**System overview** — camera → VPN tunnel → server (`Ai pipeline` + `Back office`) → MongoDB Atlas / object storage → REST API consumed by the browser:
+**System overview** — camera → VPN tunnel → server (`Ai pipeline` + this repo's `Back office`) → MongoDB Atlas / object storage → REST API consumed by the browser. `Ai pipeline` is a separate, external system shown only for overall context:
 
 ![System diagram](docs/System_Diagram.png)
 
-**Infrastructure & containers** — the IP camera reaches the cloud over a VPN tunnel; two DigitalOcean VMs host this system's containers (`Ai pipeline` VM: AI processing + session cleanup, `Ai-Backoffice` VM: this repo's `frontend` + `backend API`), backed by MongoDB Atlas and S3-compatible object storage:
+**Infrastructure & containers** — the IP camera reaches the cloud over a VPN tunnel. The wider system runs on two separate DigitalOcean VMs backed by shared MongoDB Atlas and S3-compatible object storage; **this repo only covers the `Ai-Backoffice` VM** (its `frontend` + `backend API` containers, i.e. `web/` + `api/` here). The `Ai pipeline` VM (AI processing + session cleanup) is a separate system, not part of this codebase — shown below only for overall context:
 
 ![Infrastructure & Container Architecture](docs/Infrastructure%20%26%20Container%20Architecture.png)
 
