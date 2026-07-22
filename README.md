@@ -2,6 +2,8 @@
 
 A web-based back office that is part of the **Centralized Intelligent LPR** (License Plate Recognition) system. It tracks vehicle entry/exit through camera feeds, grouping events into **sessions** (entry → parked → exit), and stores the logs and images produced by the license-plate OCR pipeline for review and auditing.
 
+**Live:** [ai-back-office-frontend-git-main-log1ris-projects.vercel.app](https://ai-back-office-frontend-git-main-log1ris-projects.vercel.app/)
+
 ## What it does
 
 - **Tracks entry/exit sessions** per vehicle, per organization (multi-organization support), with live status, parking duration, and a real-time feed over WebSocket
@@ -78,7 +80,7 @@ Key environment variables in `.env`:
 |---|---|
 | `MONGODB_URI` | MongoDB connection string |
 | `JWT_SECRET`, `JWT_REFRESH_SECRET` | Secrets for signing access/refresh tokens |
-| `DO_SPACES_KEY/SECRET/BUCKET/ENDPOINT` | Credentials for the S3-compatible object store (supports both DigitalOcean Spaces and Cloudflare R2) |
+| `DO_SPACES_KEY/SECRET/BUCKET/ENDPOINT` | Credentials for the S3-compatible object store — currently **Cloudflare R2** (var names kept as `DO_SPACES_*` for legacy/compatibility; DigitalOcean Spaces also works since both are S3-compatible) |
 | `ISSUE_PREFIX`, `PROCESS_PREFIX` | Bucket path prefixes for images, scoped per organization (`subId`) |
 | `FRONTEND_ORIGIN` | Allowed web origin for CORS |
 
@@ -111,7 +113,7 @@ Populate `api/.env` (and `web/.env.production` if the backend URL differs) befor
 - **Backend**: NestJS, MongoDB/Mongoose, Socket.IO, AWS SDK v3 (`@aws-sdk/client-s3`)
 - **Frontend**: React, Vite, TypeScript, TanStack Query/Router, Tailwind CSS, shadcn/ui
 - **Storage**: S3-compatible object storage (Cloudflare R2)
-- **Deployment**: Docker (multi-stage builds), nginx (serves the built SPA + reverse-proxies `/api/*` in production)
+- **Deployment**: `web` on Vercel, `api` on Google Cloud Run (image built and pushed to Artifact Registry); Docker (multi-stage builds) + nginx also supported for self-hosted/VM deployment
 
 ## Contributors
 
