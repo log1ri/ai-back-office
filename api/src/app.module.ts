@@ -17,7 +17,7 @@ import { OcrServicesRateModelModule } from './service/ocr-services-rate-model/oc
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      // envFilePath: '.env',
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
