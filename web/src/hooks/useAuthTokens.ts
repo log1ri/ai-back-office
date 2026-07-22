@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { apiClient, type LoginCredentials, type AuthResponse } from '../lib/api-client';
+import { apiClient, type LoginCredentials } from '../lib/api-client';
 
 interface AuthState {
   accessToken: string | null;

@@ -1,38 +1,24 @@
 import { useState } from "react";
 import React from "react";
 import {
-  Folder,
-  Forward,
-  MoreHorizontal,
-  Trash2,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "../ui/sidebar";
 import type { NavProjectsProps } from "../../types/sidebar.types";
 import { useProjectNavigation } from "../../hooks/useSidebarState";
-import { SIDEBAR_LABELS, PROJECT_MENU_ITEMS } from "../../constants/sidebar.constants";
+import { SIDEBAR_LABELS } from "../../constants/sidebar.constants";
 
 const ProjectMenuItem: React.FC<{ item: any }> = React.memo(({ item }) => {
   const [open, setOpen] = useState(false);
-  const { isMobile } = useSidebar();
   const location = useLocation();
   const isActive = location.pathname === item.url;
   const hasChildren = item.children && item.children.length > 0;

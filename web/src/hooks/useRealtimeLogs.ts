@@ -101,7 +101,7 @@ export const useRealtimeLogs = ({
       socket.on('realtime-log', (data: any) => {
         try {
           if (Array.isArray(data)) {
-            data.forEach((item, index) => {
+            data.forEach((item) => {
               const newLog: LogEvent = {
                 time: item.timestamp ? new Date(item.timestamp).toTimeString().split(' ')[0] : new Date().toTimeString().split(' ')[0],
                 ago: 'now',

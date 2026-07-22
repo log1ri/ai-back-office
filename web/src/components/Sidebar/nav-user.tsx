@@ -1,12 +1,7 @@
 "use client"
 
 import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react";
 
 import {
@@ -18,7 +13,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -29,7 +23,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "../ui/sidebar";
 
 import { useAuth } from "../../contexts/AuthContext";
@@ -44,7 +37,6 @@ const localGetInitials = (nameOrEmail: string) => {
 };
 
 export function NavUser({ user }: NavUserProps) {
-  const { isMobile } = useSidebar()
   const { logout } = useAuth()
 
   return (
