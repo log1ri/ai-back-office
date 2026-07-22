@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import helmet from 'helmet';
 
 class CorsIoAdapter extends IoAdapter {
   createIOServer(port: number, options?: any): any {
@@ -19,7 +20,9 @@ class CorsIoAdapter extends IoAdapter {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
+  app.use(helmet());
+
   // Add WebSocket adapter for Socket.IO support with CORS
   app.useWebSocketAdapter(new CorsIoAdapter(app));
   

@@ -82,6 +82,9 @@ interface RequestOptions {
   retries?: number;
   signal?: AbortSignal;
   useBackend?: boolean;
+  // internal: set once a request has already gone through one refresh-and-retry
+  // cycle, so handleResponse doesn't attempt to refresh again on a second 401
+  authRetried?: boolean;
 }
 
 // ===== ERROR CLASSES =====
@@ -359,6 +362,12 @@ class UnifiedApiClient {
     return response;
   }
 
+  // sign-in / sign-up / refresh-token / logout calls must never trigger the
+  // refresh-and-retry flow themselves, or a 401 from a bad login recurses forever
+  private isAuthEndpoint(ep: string): boolean {
+    return ep.replace(/^\//, '').startsWith('api/v1/auth');
+  }
+
   // ===== CORE REQUEST METHOD =====
   private async request<T>(
     endpoint: string,
@@ -397,14 +406,9 @@ class UnifiedApiClient {
       'Content-Type': 'application/json',
     };
 
-    // helper function to check if endpoint is auth path
-    function isAuthPath(ep: string) {
-      return ep.startsWith('/api/v1/auth');
-    }
-
     // เพิ่ม headers ตามประเภท API
     if (useBackend) {
-      const onAuth = isAuthPath(endpoint);
+      const onAuth = this.isAuthEndpoint(endpoint);
       if (!onAuth && this.backendApiKey) headers['X-API-Key'] = this.backendApiKey;
       if (this.backendToken) headers['Authorization'] = `Bearer ${this.backendToken}`;
     } else {
@@ -432,14 +436,14 @@ class UnifiedApiClient {
       requestInit.signal = controller.signal;
       
       try {
-        const result = await this.requestWithRetry<T>(url, requestInit, requestOptions.retries, useBackend);
+        const result = await this.requestWithRetry<T>(url, requestInit, requestOptions.retries, endpoint, options, requestOptions);
         clearTimeout(timeoutId);
-        
+
         // เก็บใน cache
         if (useCache && options.method === 'GET') {
           this.setCache(cacheKey, result, cacheTTL);
         }
-        
+
         return result;
       } catch (error) {
         clearTimeout(timeoutId);
@@ -447,7 +451,7 @@ class UnifiedApiClient {
       }
     }
 
-    const result = await this.requestWithRetry<T>(url, requestInit, requestOptions.retries, useBackend);
+    const result = await this.requestWithRetry<T>(url, requestInit, requestOptions.retries, endpoint, options, requestOptions);
     
     // เก็บใน cache
     if (useCache && options.method === 'GET') {
@@ -462,30 +466,47 @@ class UnifiedApiClient {
     url: string,
     options: RequestInit,
     retries: number = this.config.maxRetries,
-    useBackend: boolean = false
+    endpoint: string = '',
+    originalOptions: RequestInit = {},
+    requestOptions: RequestOptions = {}
   ): Promise<T> {
+    const useBackend = requestOptions.useBackend ?? false;
     try {
       const response = await fetch(url, options);
-      return await this.handleResponse<T>(response, useBackend);
+      return await this.handleResponse<T>(response, endpoint, originalOptions, requestOptions);
     } catch (error) {
       if (retries > 0 && error instanceof (useBackend ? BackendApiError : ApiError)) {
         if (error.status >= 500 || error.status === 0) {
           await new Promise(resolve => setTimeout(resolve, 1000));
-          return this.requestWithRetry<T>(url, options, retries - 1, useBackend);
+          return this.requestWithRetry<T>(url, options, retries - 1, endpoint, originalOptions, requestOptions);
         }
       }
       throw error;
     }
   }
 
-  private async handleResponse<T>(response: Response, useBackend: boolean = false): Promise<T> {
+  private async handleResponse<T>(
+    response: Response,
+    endpoint: string = '',
+    originalOptions: RequestInit = {},
+    requestOptions: RequestOptions = {}
+  ): Promise<T> {
+    const useBackend = requestOptions.useBackend ?? false;
     if (!response.ok) {
-      // จัดการ token refresh สำหรับ backend
-      if (useBackend && response.status === HTTP_STATUS.UNAUTHORIZED && this.backendRefreshToken) {
+      // จัดการ token refresh สำหรับ backend — ห้ามทำกับ endpoint ของ auth เอง
+      // (sign-in/sign-up/refresh-token/logout) ไม่งั้น login ผิดพลาด/refresh token
+      // หมดอายุจะวนเรียก refresh ซ้ำไม่รู้จบ และห้ามทำซ้ำถ้า retry ไปแล้วรอบหนึ่ง
+      if (
+        useBackend &&
+        response.status === HTTP_STATUS.UNAUTHORIZED &&
+        this.backendRefreshToken &&
+        !requestOptions.authRetried &&
+        !this.isAuthEndpoint(endpoint)
+      ) {
         try {
           await this.refreshAuthToken();
-          // ลองเรียก API อีกครั้ง
-          return this.request<T>('', { method: 'GET' }, { useBackend: true });
+          // ลองเรียก request เดิมอีกครั้งด้วย token ใหม่ (ครั้งเดียว)
+          return this.request<T>(endpoint, originalOptions, { ...requestOptions, authRetried: true });
         } catch (refreshError) {
           await this.logout();
           throw new BackendApiError(
