@@ -200,7 +200,7 @@ function ImageCardComponent({
     }
   }, [provinceInput, image.id, shouldShowInputs, showInputFields, onSaveCorrection]);
   return (
-    <Card className="group hover:shadow-lg transition-shadow p-0">
+    <Card className="group hover:shadow-lg transition-shadow p-0 gap-0">
       {/* รูปภาพ (Original/Processed) */}
       <div className="flex p-2 relative">
         {/* Status Badge - แสดงเมื่อมีการ Check Rate แล้ว หรือมีข้อมูลจาก API (แสดงเสมอ) */}
@@ -247,7 +247,7 @@ function ImageCardComponent({
         </div>
       </div>
       {/* กล่องข้อมูลด้านล่าง */}
-  <div className="bg-card text-card-foreground rounded-b-lg p-4 shadow-sm">
+      <div className="flex-1 p-4">
         <h3 className="font-semibold text-lg mb-2">{image.name}</h3>
 
         {/* Reg Num Section */}
