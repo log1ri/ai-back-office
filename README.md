@@ -2,7 +2,7 @@
 
 A web-based back office that is part of the **Centralized Intelligent LPR** (License Plate Recognition) system. It tracks vehicle entry/exit through camera feeds, grouping events into **sessions** (entry → parked → exit), and stores the logs and images produced by the license-plate OCR pipeline for review and auditing.
 
-**Live:** [ai-back-office-frontend-git-main-log1ris-projects.vercel.app](https://ai-back-office-frontend-git-main-log1ris-projects.vercel.app/)
+**Live:** [ai-back-office-frontend-git-main-log1ris-projects.vercel.app](https://ai-back-office-frontend-seven.vercel.app/login)
 
 ## What it does
 
