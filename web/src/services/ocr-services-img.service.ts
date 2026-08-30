@@ -6,12 +6,6 @@ export class OcrServicesRateModelService extends BaseHttpClient {
 
   async downloadZip(subId:string, status:'accept'|'reject',startDate: Date|string, endDate: Date|string): Promise<void> {
 
-    // --- Hardcoded params for testing ---
-    // const subId = '686756400ae6dcd28bee12af';
-    // const status = 'accept';
-    // const startDate = '2025-09-09';
-    // const endDate = '2025-09-10';
-
     // --- Validate inputs ---
     const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
     const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
@@ -42,7 +36,7 @@ export class OcrServicesRateModelService extends BaseHttpClient {
       
     
 
-    const url = `/api/v1/ocr-services-imgs/download-zip?subId=${subId}&status=${status}&startDate=${startIso}&endDate=${endIso}`;
+    const url = `${this.baseUrl}/api/v1/ocr-services-imgs/download-zip?subId=${subId}&status=${status}&startDate=${startIso}&endDate=${endIso}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 900000);
     
@@ -85,7 +79,10 @@ export class OcrServicesRateModelService extends BaseHttpClient {
       !contentType?.includes("octet-stream") &&
       blob.type !== "application/zip"
     ) {
-      console.warn("Warning: Response may not be a ZIP file");
+      // เช่น โดน SPA rewrite ส่ง index.html กลับมาแทนไฟล์ zip
+      console.error("Unexpected content-type:", contentType, await blob.slice(0, 200).text());
+      alert("Download failed: server did not return a ZIP file. Please contact support.");
+      return;
     }
 
     const urlObj = window.URL.createObjectURL(blob);

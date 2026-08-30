@@ -65,7 +65,7 @@ DON'T:
 
 */
 export class BaseHttpClient {
-  private baseUrl: string;
+  protected baseUrl: string;
   private defaultHeaders: Record<string, string>;
 
   constructor(baseUrl: string, defaultHeaders: Record<string, string> = {}) {
